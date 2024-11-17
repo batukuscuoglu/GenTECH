@@ -44,10 +44,14 @@ function ProductManager() {
               <span>{expandedItem === item.itemId ? <FaChevronUp /> : <FaChevronDown />}</span>
             </div>
 
-            {expandedItem === item.itemId && (
+            <div
+              className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                expandedItem === item.itemId ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+              }`}
+            >
               <div className="mt-4 border rounded-md p-4 bg-gray-100 shadow-md">
                 <h2 className="text-2xl font-semibold mb-4">Comments</h2>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-secondary scrollbar-track-gray-300">
                   {item.comments.map((comment) => (
                     <div
                       key={comment.id}
@@ -83,7 +87,7 @@ function ProductManager() {
                   ))}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         ))}
       </div>
