@@ -9,7 +9,8 @@ import { FaStar, FaRegStar } from 'react-icons/fa';
 function Items() {
   const { id } = useParams();
   const item = itemData.find((item) => item.id === parseInt(id));
-  const commentsForItem = commentsData.find((data) => data.itemId === parseInt(id))?.comments || [];
+  const commentsForItem =
+    commentsData.find((data) => data.itemId === parseInt(id))?.comments.filter((comment) => comment.approved) || [];
   const [quantity, setQuantity] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
