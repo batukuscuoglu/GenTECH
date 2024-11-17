@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import itemData from '../mockData/itemdata';
+import commentsData from '../mockData/commentsData'; 
 import Footer from './Footer';
+import { FaStar, FaRegStar } from 'react-icons/fa'; 
 
 function Items() {
   const { id } = useParams();
   const item = itemData.find((item) => item.id === parseInt(id));
+  const commentsForItem = commentsData.find((data) => data.itemId === parseInt(id))?.comments || [];
   const [quantity, setQuantity] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -24,13 +27,13 @@ function Items() {
     setDropdownOpen(false);
   };
 
-  if (!item) {
-    return <div className="text-center p-4">Item not found.</div>;
-  }
-
   const handleCategoryClick = () => {
     navigate('/categories', { state: { selectedCategory: item.itemCategory } });
   };
+
+  if (!item) {
+    return <div className="text-center p-4">Item not found.</div>;
+  }
 
   return (
     <div>
@@ -86,6 +89,34 @@ function Items() {
             <button className="w-full bg-primary py-3 rounded-md text-white transition-all hover:bg-white hover:text-primary hover:border-2 hover:border-primary">
               Add to Cart
             </button>
+          </div>
+        </div>
+
+        {/* Comment Section */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-semibold mb-4">Comments</h2>
+          <div className="space-y-4">
+            {commentsForItem.map((comment) => (
+              <div
+                key={comment.id}
+                className="p-4 border-2 rounded-md shadow-sm border-primary"
+              >
+                <p className="text-lg font-semibold">{comment.username}</p>
+                <div className="flex items-center mb-2">
+                  {/* Render stars based on rating */}
+                  {Array(5)
+                    .fill(0)
+                    .map((_, index) =>
+                      index < comment.rating ? (
+                        <FaStar key={index} className="text-primary mr-1" />
+                      ) : (
+                        <FaRegStar key={index} className="text-gray-400 mr-1" />
+                      )
+                    )}
+                </div>
+                <p>{comment.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
