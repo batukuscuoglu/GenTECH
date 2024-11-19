@@ -17,14 +17,21 @@ function Items() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    if (item && quantity > item.stock) {
+      setQuantity(item.stock);
+    }
+  }, [item]);
 
   const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
+    if (item?.stock > 0) {
+      setDropdownOpen(!dropdownOpen);
+    }
   };
 
   const handleQuantityChange = (value) => {
-    setQuantity(value);
+    if (value <= item.stock) {
+      setQuantity(value);
+    }
     setDropdownOpen(false);
   };
 
@@ -62,34 +69,51 @@ function Items() {
             <p className="text-xl mb-2">{item.price}</p>
             <p className="text-lg mb-4">{item.description}</p>
 
-            {/* Quantity Selector Dropdown */}
-            <div className="relative mb-4 w-40">
-              <button
-                onClick={toggleDropdown}
-                className="w-full p-2 border rounded-md bg-white flex items-center justify-between"
-              >
-                <span>Quantity:</span> <span className="ml-1 font-semibold">{quantity}</span>
-              </button>
-              {dropdownOpen && (
-                <div className="absolute w-full border rounded-md bg-white shadow-lg z-10 mt-1 max-h-40 overflow-y-auto">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20].map((value) => (
-                    <div
-                      key={value}
-                      onClick={() => handleQuantityChange(value)}
-                      className={`cursor-pointer p-2 hover:bg-gray-200 text-center ${
-                        value === quantity ? 'bg-primary text-white font-bold rounded-md' : ''
-                      }`}
-                    >
-                      {value}
+            {item.stock > 0 ? (
+              <>
+                {/* Quantity Selector Dropdown */}
+                <div className="relative mb-4 w-40">
+                  <button
+                    onClick={toggleDropdown}
+                    className="w-full p-2 border rounded-md bg-white flex items-center justify-between"
+                  >
+                    <span>Quantity:</span> <span className="ml-1 font-semibold">{quantity}</span>
+                  </button>
+                  {dropdownOpen && (
+                    <div className="absolute w-full border rounded-md bg-white shadow-lg z-10 mt-1 max-h-40 overflow-y-auto">
+                      {[...Array(item.stock).keys()].map((_, index) => {
+                        const value = index + 1;
+                        return (
+                          <div
+                            key={value}
+                            onClick={() => handleQuantityChange(value)}
+                            className={`cursor-pointer p-2 hover:bg-gray-200 text-center ${
+                              value === quantity ? 'bg-primary text-white font-bold rounded-md' : ''
+                            }`}
+                          >
+                            {value}
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
 
-            <button className="w-full bg-primary py-3 rounded-md text-white transition-all hover:bg-white hover:text-primary hover:border-2 hover:border-primary">
-              Add to Cart
-            </button>
+                <button className="w-full bg-primary py-3 rounded-md text-white transition-all hover:bg-white hover:text-primary hover:border-2 hover:border-primary">
+                  Add to Cart
+                </button>
+              </>
+            ) : (
+              <div className="text-center mt-4">
+                <p className="text-red-500 text-lg font-semibold mb-2">Out of Stock</p>
+                <button
+                  className="w-full bg-gray-400 py-3 rounded-md text-white cursor-not-allowed"
+                  disabled
+                >
+                  Add to Cart
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

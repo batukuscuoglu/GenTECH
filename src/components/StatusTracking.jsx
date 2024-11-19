@@ -8,7 +8,7 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 function StatusTracking() {
   const { id } = useParams(); // Get order ID from the URL
   const order = orderStatusData.find((order) => order.orderId === parseInt(id));
-  const [isExpanded, setIsExpanded] = useState(false); // Sliding open/close for Order Summary
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (!order) {
     return (
@@ -32,7 +32,7 @@ function StatusTracking() {
       <div className="container mx-auto p-8">
         <h1 className="text-3xl font-bold mb-6">Order Tracking</h1>
 
-        {/* Collapsible Order Summary */}
+        {/* Collapsible Order Summary with sliding effect */}
         <div className="bg-gray-100 p-6 rounded-md shadow-md mb-6">
           <div
             className="flex items-center justify-between cursor-pointer"
@@ -54,31 +54,33 @@ function StatusTracking() {
                 </p>
               </div>
             </div>
-            <span className="text-secodnary text-lg">
+            <span className="text-secondary text-lg">
               {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             </span>
           </div>
 
-          {isExpanded && (
-            <div className="mt-4 border-t pt-4">
-              <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
-              <p className="text-gray-700">
-                <strong>Order ID:</strong> {order.orderId}
-              </p>
-              <p className="text-gray-700">
-                <strong>Shipping Address:</strong> {order.shippingAddress}
-              </p>
-              <p className="text-gray-700">
-                <strong>Status:</strong> {order.status}
-              </p>
-              <p className="text-gray-700">
-                <strong>Estimated Delivery:</strong> {order.estimatedDelivery}
-              </p>
-              <p className="text-gray-700">
-                <strong>Total Price:</strong> ${order.quantity * order.price}
-              </p>
-            </div>
-          )}
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+              isExpanded ? 'max-h-screen opacity-100 mt-4 border-t pt-4' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
+            <p className="text-gray-700">
+              <strong>Order ID:</strong> {order.orderId}
+            </p>
+            <p className="text-gray-700">
+              <strong>Shipping Address:</strong> {order.shippingAddress}
+            </p>
+            <p className="text-gray-700">
+              <strong>Status:</strong> {order.status}
+            </p>
+            <p className="text-gray-700">
+              <strong>Estimated Delivery:</strong> {order.estimatedDelivery}
+            </p>
+            <p className="text-gray-700">
+              <strong>Total Price:</strong> ${order.quantity * order.price}
+            </p>
+          </div>
         </div>
 
         {/* Status Tracker */}
