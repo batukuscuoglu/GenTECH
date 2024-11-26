@@ -1,115 +1,55 @@
 import './Login.css';
 import Navbar from "./Navbar/Navbar";
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const [apiResponse, setApiResponse] = useState(null);
   const navigate = useNavigate();
-
-  async function registerUser(name, email, password) {
-    try {
-      const response = await fetch('APIIIIIIIIIIIIIIIIIIIIIIIIIII', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Kayıt İşlemi Başarısız Oldu!');
-      }
-      const data = await response.json();
-      setApiResponse(data);
-      localStorage.setItem('userId', data.userId.toString());
-      localStorage.setItem('userName', data.userName);
-
-      // Kullanıcı başarılı bir şekilde kaydolduğunda yönlendirme
-      navigate('/home');
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function addEducationRelations(userId, eduIds) {
-    try {
-      const promises = eduIds.map(async (eduId) => {
-        const response = await fetch('APIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            eduId,
-            userId,
-            RelStatus: ""
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`API ERROR`);
-        }
-
-        const data = await response.json();
-        return data;
-      });
-
-      await Promise.all(promises);
-    } catch (error) {
-      console.error('API ERROR', error);
-    }
-  }
 
   async function loginUser(email, password) {
     try {
-      const response = await fetch('APIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII', {
+      const response = await fetch('http://localhost:8080/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: new URLSearchParams({
+          username: email, // Backend expects 'username'
+          password: password, // Backend expects 'password'
+        }).toString(),
+        credentials: 'include', // Include the JSESSIONID cookie
       });
 
-      const data = await response.json();
-      if (data.userId === 0) {
-        throw new Error('Giriş yapılamadı.');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Login Error:', errorText);
+        alert('Login failed. Please check your credentials.');
+        return;
       }
 
-      setApiResponse(data);
+      const data = await response.json();
+      console.log('Login Response:', data);
 
-      localStorage.setItem('userId', data.userId.toString());
-      localStorage.setItem('userName', data.userName);
-      window.location.href = '/home';
+      if (data.status === 'success') {
+        // User is logged in; no need to handle JSESSIONID manually
+        alert(data.message || 'Login successful!');
+        navigate('/'); // Redirect to the homepage
+      } else {
+        alert(data.message || 'Login failed.');
+      }
     } catch (error) {
-      console.error(error);
-      alert('Giriş yapılamadı. Lütfen e-posta adresinizi ve şifrenizi kontrol edin.');
+      console.error('Unexpected Login Error:', error.message);
+      alert('An unexpected error occurred. Please try again.');
     }
-  }
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    const newName = e.target.ad.value + " " + e.target.soyad.value;
-    const newEmail = e.target.email.value;
-    const newPassword = e.target.passw.value;
-
-    await registerUser(newName, newEmail, newPassword);
   }
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const newEmail = e.target.email.value;
-    const newPassword = e.target.passw.value;
+    const email = e.target.email.value;
+    const password = e.target.passw.value;
 
-    await loginUser(newEmail, newPassword);
-  }
+    await loginUser(email, password);
+  };
 
   return (
     <div>
@@ -118,7 +58,7 @@ function Login() {
         <div id="animatedpart" className="loginpage">
           <input type="checkbox" id="chk" aria-hidden="true" />
           <div className="signup">
-            <form onSubmit={handleRegister}>
+            <form>
               <label className="girislabel" htmlFor="chk" aria-hidden="true">Sign Up</label>
               <input className="girisinput" type="text" name="ad" placeholder="Name" required />
               <input className="girisinput" type="text" name="soyad" placeholder="Surname" required />
