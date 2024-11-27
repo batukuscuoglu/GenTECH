@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar/Navbar';
 import Card from './Card';
-import itemData from '../mockData/itemdata';
 import laptopGif from '../assets/laptop.gif'; // Import the laptop GIF
 import phoneGif from '../assets/phone.gif'; // Import the phone GIF
 import './Home.css'; // Import the CSS
 import Footer from './Footer';
+import logo from '../assets/logo.png';
 
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [products, setProducts] = useState([]); // State to store fetched products
+  const [loading, setLoading] = useState(true); // State for loading
+  const [error, setError] = useState(null); // State to handle errors
 
   const slides = [
     {
@@ -29,7 +32,36 @@ function Home() {
   ];
 
   useEffect(() => {
-    // Change slide every 5 seconds
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/product/get-all-products', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer YOUR_API_TOKEN_HERE', // Replace with your actual token
+          },
+          credentials: 'include', // Include cookies if required for session-based auth
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch products. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setProducts(data); // Set the fetched products to state
+        setLoading(false); // Stop loading
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError(error.message); // Set the error message
+        setLoading(false); // Stop loading even on error
+      }
+    };
+
+    fetchProducts(); // Trigger product fetch on component mount
+  }, []);
+
+  // Automatic slide change
+  useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -69,15 +101,21 @@ function Home() {
       </div>
 
       <div className="flex flex-wrap gap-4 justify-center p-4">
-        {itemData.map((item) => (
-          <Card 
-            key={item.id}
-            cardName={item.cardName}
-            to={`/items/${item.id}`}
-            imgSrc={item.imgSrc}
-            price={item.price}
-          />
-        ))}
+        {loading ? (
+          <p>Loading products...</p> // Display loading message while fetching
+        ) : error ? (
+          <p>Error: {error}</p> // Display error message if something goes wrong
+        ) : (
+          products.map((product) => (
+            <Card 
+              key={product.id}
+              cardName={product.title} // Use the title from the fetched data
+              to={`/items/${product.id}`} // Link to the product's detail page
+              imgSrc={logo} // The image will be handled in the Card component
+              price={`$${product.basePrice}`} // Format the price
+            />
+          ))
+        )}
       </div>
       <Footer />
     </div>
