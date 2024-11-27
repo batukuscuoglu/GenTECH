@@ -126,7 +126,7 @@ function Items() {
 
   const handleBackToCategory = () => {
     navigate('/categories', {
-      state: { selectedCategory: item.categoryId },
+      state: { selectedCategoryId: item.categoryId }, // Pass the categoryId to Categories
     });
   };
 
