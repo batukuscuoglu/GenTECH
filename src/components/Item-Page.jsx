@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from './Navbar/Navbar';
-import Footer from './Footer';
-import logo from '../assets/logo.png';
-import { FaStar, FaRegStar } from 'react-icons/fa'; // For displaying star ratings
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "./Navbar/Navbar";
+import Footer from "./Footer";
+import logo from "../assets/logo.png";
+import { FaStar, FaRegStar } from "react-icons/fa"; // For displaying star ratings
 
 function Items() {
   const { id } = useParams(); // Get the product ID from the URL
   const [item, setItem] = useState(null); // State for item details
-  const [categoryName, setCategoryName] = useState(''); // State for category name
+  const [categoryName, setCategoryName] = useState(""); // State for category name
   const [comments, setComments] = useState([]); // State for comments
   const [quantity, setQuantity] = useState(1); // Quantity for item
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown state
@@ -16,7 +16,6 @@ function Items() {
   const [commentsLoading, setCommentsLoading] = useState(true); // Loading state for comments
   const [error, setError] = useState(null); // Error state
   const [commentsError, setCommentsError] = useState(null); // Error state for comments
-  const [cartSuccessMessage, setCartSuccessMessage] = useState(null); // Success message for adding to cart
   const navigate = useNavigate();
 
   // Fetch item details from the API
@@ -24,12 +23,12 @@ function Items() {
     const fetchItem = async () => {
       try {
         const response = await fetch(`http://localhost:8080/api/product/${id}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+            "Content-Type": "application/json",
+            Authorization: "Bearer YOUR_API_TOKEN_HERE", // Replace with actual token
           },
-          credentials: 'include', // Include cookies if session-based auth is used
+          credentials: "include", // Include cookies if session-based auth is used
         });
 
         if (!response.ok) {
@@ -41,7 +40,7 @@ function Items() {
         setLoading(false); // Set loading to false
         fetchCategoryName(data.categoryId); // Fetch the category name
       } catch (err) {
-        console.error('Error fetching item:', err);
+        console.error("Error fetching item:", err);
         setError(err.message);
         setLoading(false); // Set loading to false even if there's an error
       }
@@ -49,14 +48,17 @@ function Items() {
 
     const fetchCategoryName = async (categoryId) => {
       try {
-        const response = await fetch('http://localhost:8080/api/pm/get-categories', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
-          },
-          credentials: 'include',
-        });
+        const response = await fetch(
+          "http://localhost:8080/api/pm/get-categories",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer YOUR_API_TOKEN_HERE", // Replace with actual token
+            },
+            credentials: "include",
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Failed to fetch categories. Status: ${response.status}`);
@@ -64,10 +66,10 @@ function Items() {
 
         const categories = await response.json();
         const category = categories.find((cat) => cat.id === categoryId);
-        setCategoryName(category?.name || 'Unknown Category');
+        setCategoryName(category?.name || "Unknown Category");
       } catch (err) {
-        console.error('Error fetching category:', err);
-        setCategoryName('Unknown Category');
+        console.error("Error fetching category:", err);
+        setCategoryName("Unknown Category");
       }
     };
 
@@ -79,12 +81,12 @@ function Items() {
     const fetchComments = async () => {
       try {
         const response = await fetch(`http://localhost:8080/api/comments/${id}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+            "Content-Type": "application/json",
+            Authorization: "Bearer YOUR_API_TOKEN_HERE", // Replace with actual token
           },
-          credentials: 'include', // Include cookies if session-based auth is used
+          credentials: "include", // Include cookies if session-based auth is used
         });
 
         if (!response.ok) {
@@ -96,7 +98,7 @@ function Items() {
         setComments(approvedComments); // Set the approved comments
         setCommentsLoading(false); // Set loading to false
       } catch (err) {
-        console.error('Error fetching comments:', err);
+        console.error("Error fetching comments:", err);
         setCommentsError(err.message);
         setCommentsLoading(false); // Set loading to false even if there's an error
       }
@@ -125,17 +127,29 @@ function Items() {
     setDropdownOpen(false); // Close dropdown
   };
 
+  // Add or update item in cart
   const handleAddToCart = async () => {
     try {
+      // First, remove the item from the cart (if it exists)
+      await fetch(`http://localhost:8080/api/cart/remove?productId=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer YOUR_API_TOKEN_HERE",
+        },
+        credentials: "include",
+      });
+
+      // Then, add the item to the cart with the selected quantity
       const response = await fetch(
         `http://localhost:8080/api/cart/cart/add?productId=${id}&quantity=${quantity}`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+            "Content-Type": "application/json",
+            Authorization: "Bearer YOUR_API_TOKEN_HERE",
           },
-          credentials: 'include',
+          credentials: "include",
         }
       );
 
@@ -143,16 +157,15 @@ function Items() {
         throw new Error(`Failed to add item to cart. Status: ${response.status}`);
       }
 
-      setCartSuccessMessage(`Successfully added ${quantity} item(s) to the cart.`);
-      setTimeout(() => setCartSuccessMessage(null), 3000); // Clear success message after 3 seconds
+      alert("Item successfully added to cart!");
     } catch (err) {
-      console.error('Error adding to cart:', err.message);
-      setError('Failed to add item to cart.');
+      console.error("Error adding to cart:", err);
+      alert("Failed to add item to cart.");
     }
   };
 
   const handleBackToCategory = () => {
-    navigate('/categories', {
+    navigate("/categories", {
       state: { selectedCategoryId: item.categoryId }, // Pass the categoryId to Categories
     });
   };
@@ -176,16 +189,19 @@ function Items() {
         {/* Breadcrumb */}
         <div className="mb-4 text-lg">
           <span
-            onClick={() => navigate('/categories')}
+            onClick={() => navigate("/categories")}
             className="text-primary cursor-pointer hover:underline"
           >
             Categories
           </span>
-          {' > '}
-          <span className="text-primary cursor-pointer hover:underline" onClick={handleBackToCategory}>
+          {" > "}
+          <span
+            className="text-primary cursor-pointer hover:underline"
+            onClick={handleBackToCategory}
+          >
             {categoryName}
           </span>
-          {' > '}
+          {" > "}
           <span className="font-semibold">{item.title}</span>
         </div>
 
@@ -213,7 +229,7 @@ function Items() {
                     onClick={toggleDropdown}
                     className="w-full p-2 border rounded-md bg-white flex items-center justify-between"
                   >
-                    <span>Quantity:</span>{' '}
+                    <span>Quantity:</span>{" "}
                     <span className="ml-1 font-semibold">{quantity}</span>
                   </button>
                   {dropdownOpen && (
@@ -225,7 +241,9 @@ function Items() {
                             key={value}
                             onClick={() => handleQuantityChange(value)}
                             className={`cursor-pointer p-2 hover:bg-gray-200 text-center ${
-                              value === quantity ? 'bg-primary text-white font-bold rounded-md' : ''
+                              value === quantity
+                                ? "bg-primary text-white font-bold rounded-md"
+                                : ""
                             }`}
                           >
                             {value}
@@ -242,13 +260,12 @@ function Items() {
                 >
                   Add to Cart
                 </button>
-                {cartSuccessMessage && (
-                  <p className="text-green-500 text-sm mt-2">{cartSuccessMessage}</p>
-                )}
               </>
             ) : (
               <div className="text-center mt-4">
-                <p className="text-red-500 text-lg font-semibold mb-2">Out of Stock</p>
+                <p className="text-red-500 text-lg font-semibold mb-2">
+                  Out of Stock
+                </p>
                 <button
                   className="w-full bg-gray-400 py-3 rounded-md text-white cursor-not-allowed"
                   disabled
