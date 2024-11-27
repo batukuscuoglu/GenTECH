@@ -16,6 +16,8 @@ function Items() {
   const [commentsLoading, setCommentsLoading] = useState(true); // Loading state for comments
   const [error, setError] = useState(null); // Error state
   const [commentsError, setCommentsError] = useState(null); // Error state for comments
+  const [cartMessage, setCartMessage] = useState(""); // Message for cart operation
+  const [cartMessageType, setCartMessageType] = useState(""); // Message type (success/error)
   const navigate = useNavigate();
 
   // Fetch item details from the API
@@ -157,10 +159,12 @@ function Items() {
         throw new Error(`Failed to add item to cart. Status: ${response.status}`);
       }
 
-      alert("Item successfully added to cart!");
+      setCartMessage("Item successfully added to cart!");
+      setCartMessageType("success");
     } catch (err) {
       console.error("Error adding to cart:", err);
-      alert("Failed to add item to cart.");
+      setCartMessage("Failed to add item to cart.");
+      setCartMessageType("error");
     }
   };
 
@@ -260,6 +264,17 @@ function Items() {
                 >
                   Add to Cart
                 </button>
+                {cartMessage && (
+                  <p
+                    className={`mt-2 text-center ${
+                      cartMessageType === "success"
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {cartMessage}
+                  </p>
+                )}
               </>
             ) : (
               <div className="text-center mt-4">
