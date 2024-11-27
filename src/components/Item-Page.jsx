@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import logo from '../assets/logo.png';
@@ -8,6 +8,7 @@ import { FaStar, FaRegStar } from 'react-icons/fa'; // For displaying star ratin
 function Items() {
   const { id } = useParams(); // Get the product ID from the URL
   const [item, setItem] = useState(null); // State for item details
+  const [categoryName, setCategoryName] = useState(''); // State for category name
   const [comments, setComments] = useState([]); // State for comments
   const [quantity, setQuantity] = useState(1); // Quantity for item
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown state
@@ -15,6 +16,7 @@ function Items() {
   const [commentsLoading, setCommentsLoading] = useState(true); // Loading state for comments
   const [error, setError] = useState(null); // Error state
   const [commentsError, setCommentsError] = useState(null); // Error state for comments
+  const navigate = useNavigate();
 
   // Fetch item details from the API
   useEffect(() => {
@@ -36,10 +38,35 @@ function Items() {
         const data = await response.json();
         setItem(data); // Set the fetched item data
         setLoading(false); // Set loading to false
+        fetchCategoryName(data.categoryId); // Fetch the category name
       } catch (err) {
         console.error('Error fetching item:', err);
         setError(err.message);
         setLoading(false); // Set loading to false even if there's an error
+      }
+    };
+
+    const fetchCategoryName = async (categoryId) => {
+      try {
+        const response = await fetch('http://localhost:8080/api/pm/get-categories', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch categories. Status: ${response.status}`);
+        }
+
+        const categories = await response.json();
+        const category = categories.find((cat) => cat.id === categoryId);
+        setCategoryName(category?.name || 'Unknown Category');
+      } catch (err) {
+        console.error('Error fetching category:', err);
+        setCategoryName('Unknown Category');
       }
     };
 
@@ -97,6 +124,12 @@ function Items() {
     setDropdownOpen(false); // Close dropdown
   };
 
+  const handleBackToCategory = () => {
+    navigate('/categories', {
+      state: { selectedCategory: item.categoryId },
+    });
+  };
+
   if (loading) {
     return <div className="text-center p-4">Loading item details...</div>;
   }
@@ -113,6 +146,23 @@ function Items() {
     <div>
       <Navbar />
       <div className="p-8">
+        {/* Breadcrumb */}
+        <div className="mb-4 text-lg">
+          <span
+            onClick={() => navigate('/categories')}
+            className="text-primary cursor-pointer hover:underline"
+          >
+            Categories
+          </span>
+          {' > '}
+          <span className="text-primary cursor-pointer hover:underline" onClick={handleBackToCategory}>
+            {categoryName}
+          </span>
+          {' > '}
+          <span className="font-semibold">{item.title}</span>
+        </div>
+
+        {/* Item Details */}
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 flex justify-center mb-4 md:mb-0">
             {/* Always display the logo */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import Card from './Card';
@@ -11,6 +11,7 @@ function Categories() {
   const [products, setProducts] = useState([]); // Products in the selected category
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
+  const location = useLocation(); // Access state from navigation
   const navigate = useNavigate();
 
   // Fetch all categories
@@ -75,6 +76,18 @@ function Categories() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Handle category selection from state passed via navigation
+  useEffect(() => {
+    const state = location.state || {};
+    if (state.selectedCategoryId) {
+      const category = categories.find((cat) => cat.id === state.selectedCategoryId);
+      if (category) {
+        setSelectedCategory(category);
+        fetchProductsByCategory(state.selectedCategoryId);
+      }
+    }
+  }, [categories, location.state]);
 
   // Handle category click to fetch products
   const handleCategoryClick = (category) => {
