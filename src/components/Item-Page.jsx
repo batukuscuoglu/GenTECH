@@ -16,6 +16,7 @@ function Items() {
   const [commentsLoading, setCommentsLoading] = useState(true); // Loading state for comments
   const [error, setError] = useState(null); // Error state
   const [commentsError, setCommentsError] = useState(null); // Error state for comments
+  const [cartSuccessMessage, setCartSuccessMessage] = useState(null); // Success message for adding to cart
   const navigate = useNavigate();
 
   // Fetch item details from the API
@@ -124,6 +125,32 @@ function Items() {
     setDropdownOpen(false); // Close dropdown
   };
 
+  const handleAddToCart = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/cart/cart/add?productId=${id}&quantity=${quantity}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to add item to cart. Status: ${response.status}`);
+      }
+
+      setCartSuccessMessage(`Successfully added ${quantity} item(s) to the cart.`);
+      setTimeout(() => setCartSuccessMessage(null), 3000); // Clear success message after 3 seconds
+    } catch (err) {
+      console.error('Error adding to cart:', err.message);
+      setError('Failed to add item to cart.');
+    }
+  };
+
   const handleBackToCategory = () => {
     navigate('/categories', {
       state: { selectedCategoryId: item.categoryId }, // Pass the categoryId to Categories
@@ -209,9 +236,15 @@ function Items() {
                   )}
                 </div>
 
-                <button className="w-full bg-primary py-3 rounded-md text-white transition-all hover:bg-white hover:text-primary hover:border-2 hover:border-primary">
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full bg-primary py-3 rounded-md text-white transition-all hover:bg-white hover:text-primary hover:border-2 hover:border-primary"
+                >
                   Add to Cart
                 </button>
+                {cartSuccessMessage && (
+                  <p className="text-green-500 text-sm mt-2">{cartSuccessMessage}</p>
+                )}
               </>
             ) : (
               <div className="text-center mt-4">
@@ -241,6 +274,8 @@ function Items() {
                   key={comment.id}
                   className="p-4 border-2 rounded-md shadow-sm border-primary"
                 >
+                  {/* Display userId or username */}
+                  <p className="font-semibold mb-1">User ID: {comment.userId}</p>
                   <div className="flex items-center mb-2">
                     {/* Render stars based on rating */}
                     {Array(5)
