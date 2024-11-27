@@ -151,7 +151,7 @@ function CartPage() {
                       }
                       className="border rounded-md p-1"
                     >
-                      {[...Array(10).keys()].map((num) => (
+                      {[...Array(item.product.quantityInStock || 1).keys()].map((num) => (
                         <option key={num + 1} value={num + 1}>
                           {num + 1}
                         </option>
