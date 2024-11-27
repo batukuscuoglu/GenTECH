@@ -1,37 +1,103 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
-import categoryData from '../mockData/categoryData';
-import itemData from '../mockData/itemdata';
-import Card from './Card';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
+import Card from './Card';
+import logo from '../assets/logo.png';
 
 function Categories() {
-  const location = useLocation();
-  const navigate = useNavigate(); // Initialize navigate
-  const [selectedCategory, setSelectedCategory] = useState(location.state?.selectedCategory || null);
+  const [categories, setCategories] = useState([]); // Categories list
+  const [selectedCategory, setSelectedCategory] = useState(null); // Selected category
+  const [products, setProducts] = useState([]); // Products in the selected category
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (location.state?.selectedCategory) {
-      setSelectedCategory(location.state.selectedCategory);
+  // Fetch all categories
+  const fetchCategories = async () => {
+    try {
+      setLoading(true); // Start loading
+      const response = await fetch('http://localhost:8080/api/pm/get-categories', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer <your-token>', // Replace <your-token> with the actual token
+        },
+        credentials: 'include', // Include cookies for session-based auth
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch categories. Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const activeCategories = data.filter((category) => category.isActive); // Filter active categories
+      setCategories(activeCategories); // Update categories state
+      setLoading(false); // Stop loading
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setError(err.message);
+      setLoading(false); // Stop loading even if there's an error
     }
-  }, [location.state]);
+  };
 
-  const handleCategoryClick = (categoryName) => {
-    setSelectedCategory(categoryName);
+  // Fetch products by category
+  const fetchProductsByCategory = async (categoryId) => {
+    try {
+      setLoading(true); // Start loading
+      const response = await fetch(
+        `http://localhost:8080/api/product/sort-by-price-and-category?categoryId=${categoryId}&page=0&size=100&sortDirection=asc`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer <your-token>', // Replace <your-token> with the actual token
+          },
+          credentials: 'include', // Include cookies for session-based auth
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch products. Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setProducts(data.content || []); // Update products state
+      setLoading(false); // Stop loading
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError(err.message);
+      setLoading(false); // Stop loading even if there's an error
+    }
+  };
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Handle category click to fetch products
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category); // Set selected category
+    fetchProductsByCategory(category.id); // Fetch products for the selected category
   };
 
   const handleBackToCategories = () => {
-    setSelectedCategory(null);
+    setSelectedCategory(null); // Reset selected category
+    setProducts([]); // Clear products
   };
 
   const handleShowAllProducts = () => {
     navigate('/all-products'); // Navigate to the all-products page
   };
 
-  const filteredItems = selectedCategory
-    ? itemData.filter(item => item.itemCategory === selectedCategory)
-    : [];
+  if (loading) {
+    return <div className="text-center p-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-4 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div>
@@ -48,20 +114,20 @@ function Categories() {
                 Categories
               </span>
               {' > '}
-              <span className="font-semibold">{selectedCategory}</span>
+              <span className="font-semibold">{selectedCategory.name}</span>
             </div>
 
             {/* Display items in the selected category */}
-            <h2 className="text-2xl font-semibold mb-4">Items in {selectedCategory}</h2>
+            <h2 className="text-2xl font-semibold mb-4">Items in {selectedCategory.name}</h2>
             <div className="flex flex-wrap justify-center gap-4">
-              {filteredItems.length > 0 ? (
-                filteredItems.map(item => (
-                  <Card 
-                    key={item.id}
-                    to={`/items/${item.id}`}
-                    cardName={item.cardName}
-                    imgSrc={item.imgSrc}
-                    price={item.price}
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <Card
+                    key={product.id}
+                    to={`/items/${product.id}`}
+                    cardName={product.title}
+                    imgSrc={logo} // Always use logo.png
+                    price={`$${product.basePrice}`}
                   />
                 ))
               ) : (
@@ -70,32 +136,32 @@ function Categories() {
             </div>
           </div>
         ) : (
-          <>
+          <div>
             <h1 className="text-4xl font-bold mb-8 text-center">Categories</h1>
             <div className="flex flex-wrap justify-center gap-4">
-              {categoryData.map(category => (
+              {categories.map((category) => (
                 <div
                   key={category.id}
-                  onClick={() => handleCategoryClick(category.categoryName)}
+                  onClick={() => handleCategoryClick(category)}
                   className="cursor-pointer transition-transform transform hover:scale-105 shadow-md rounded-lg overflow-hidden"
                 >
-                  <img src={category.imgSrc} alt={category.categoryName} className="w-60 h-40 object-cover" />
+                  <img src={logo} alt={category.name} className="w-60 h-40 object-cover" /> {/* Fixed imgSrc to src */}
                   <div className="bg-gray-800 text-white text-center p-2">
-                    {category.categoryName}
+                    {category.name}
                   </div>
                 </div>
               ))}
             </div>
             {/* Button to show all products */}
             <div className="mt-8 text-center">
-              <button 
-                onClick={handleShowAllProducts} 
+              <button
+                onClick={handleShowAllProducts}
                 className="bg-secondary text-white p-2 rounded-md hover:bg-primary transition-colors"
               >
                 Show All Products
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
       <Footer />
