@@ -18,7 +18,7 @@ function Categories() {
   const fetchCategories = async () => {
     try {
       setLoading(true); // Start loading
-      const response = await fetch('http://localhost:8080/api/pm/get-categories', {
+      const response = await fetch('http://localhost:8080/api/product/get-categories', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

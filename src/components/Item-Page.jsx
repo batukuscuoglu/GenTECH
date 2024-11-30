@@ -10,6 +10,7 @@ function Items() {
   const [item, setItem] = useState(null); // State for item details
   const [categoryName, setCategoryName] = useState(""); // State for category name
   const [comments, setComments] = useState([]); // State for comments
+  const [avgRating, setAvgRating] = useState(null); // State for average rating
   const [quantity, setQuantity] = useState(1); // Quantity for item
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown state
   const [loading, setLoading] = useState(true); // Loading state for item
@@ -51,7 +52,7 @@ function Items() {
     const fetchCategoryName = async (categoryId) => {
       try {
         const response = await fetch(
-          "http://localhost:8080/api/pm/get-categories",
+          "http://localhost:8080/api/product/get-categories",
           {
             method: "GET",
             headers: {
@@ -76,6 +77,38 @@ function Items() {
     };
 
     fetchItem(); // Fetch item on component mount
+  }, [id]);
+
+  // Fetch average rating
+  useEffect(() => {
+    const fetchAverageRating = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/comments/${id}/get-avg-rating`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // Include cookies if session-based auth is used
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch average rating. Status: ${response.status}`
+          );
+        }
+
+        const rating = await response.json();
+        setAvgRating(rating); // Set the fetched average rating
+      } catch (err) {
+        console.error("Error fetching average rating:", err);
+        setAvgRating(null);
+      }
+    };
+
+    fetchAverageRating();
   }, [id]);
 
   // Fetch comments for the product
@@ -222,6 +255,25 @@ function Items() {
 
           <div className="md:w-1/2 flex flex-col p-4">
             <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
+
+            {/* Average Rating Section */}
+            {avgRating !== null && (
+              <div className="flex items-center mb-2">
+                {Array(5)
+                  .fill(0)
+                  .map((_, index) =>
+                    index < Math.round(avgRating) ? (
+                      <FaStar key={index} className="text-primary mr-1" />
+                    ) : (
+                      <FaRegStar key={index} className="text-gray-400 mr-1" />
+                    )
+                  )}
+                <span className="ml-2 text-lg font-semibold">
+                  {avgRating.toFixed(1)}
+                </span>
+              </div>
+            )}
+
             <p className="text-xl mb-2">${item.basePrice}</p>
             <p className="text-lg mb-4">{item.description}</p>
 
