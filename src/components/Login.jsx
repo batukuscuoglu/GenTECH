@@ -54,19 +54,58 @@ function Login() {
     }
 
     try {
-      for (const item of offlineCart) {
-        // Add each offline cart item to the backend cart
-        await fetch(
-          `http://localhost:8080/api/cart/cart/add?productId=${item.productId}&quantity=${item.quantity}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer YOUR_API_TOKEN_HERE',
-            },
-            credentials: 'include',
-          }
+      // Fetch the existing online cart
+      const response = await fetch('http://localhost:8080/api/cart', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer YOUR_API_TOKEN_HERE',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch online cart during merge.');
+      }
+
+      const onlineCartData = await response.json();
+      const onlineCartItems = onlineCartData.cartItems || [];
+
+      // Merge offline cart items into online cart
+      for (const offlineItem of offlineCart) {
+        const matchingOnlineItem = onlineCartItems.find(
+          (onlineItem) => onlineItem.product.id === offlineItem.productId
         );
+
+        if (matchingOnlineItem) {
+          // If item exists in both carts, update its quantity in the backend
+          const newQuantity = matchingOnlineItem.quantity + offlineItem.quantity;
+
+          await fetch(
+            `http://localhost:8080/api/cart/update-quantity?productId=${offlineItem.productId}&quantity=${newQuantity}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer YOUR_API_TOKEN_HERE',
+              },
+              credentials: 'include',
+            }
+          );
+        } else {
+          // If item exists only in the offline cart, add it to the backend cart
+          await fetch(
+            `http://localhost:8080/api/cart/cart/add?productId=${offlineItem.productId}&quantity=${offlineItem.quantity}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer YOUR_API_TOKEN_HERE',
+              },
+              credentials: 'include',
+            }
+          );
+        }
       }
 
       // Clear offline cart after successful merge
