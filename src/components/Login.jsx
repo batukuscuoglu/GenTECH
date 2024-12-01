@@ -1,11 +1,12 @@
 import './Login.css';
-import Navbar from "./Navbar/Navbar";
+import Navbar from './Navbar/Navbar';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const navigate = useNavigate();
 
+  // Function to log in the user
   async function loginUser(email, password) {
     try {
       const response = await fetch('http://localhost:8080/login', {
@@ -32,6 +33,7 @@ function Login() {
 
       if (data.status === 'success') {
         alert(data.message || 'Login successful!');
+        await mergeOfflineCart(); // Merge offline cart with backend cart
         navigate('/');
       } else {
         alert(data.message || 'Login failed.');
@@ -42,6 +44,41 @@ function Login() {
     }
   }
 
+  // Function to merge offline cart into the backend cart
+  async function mergeOfflineCart() {
+    const offlineCart = JSON.parse(localStorage.getItem('offlineCart')) || [];
+
+    if (offlineCart.length === 0) {
+      // If there are no items in the offline cart, no need to merge
+      return;
+    }
+
+    try {
+      for (const item of offlineCart) {
+        // Add each offline cart item to the backend cart
+        await fetch(
+          `http://localhost:8080/api/cart/cart/add?productId=${item.productId}&quantity=${item.quantity}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer YOUR_API_TOKEN_HERE',
+            },
+            credentials: 'include',
+          }
+        );
+      }
+
+      // Clear offline cart after successful merge
+      localStorage.removeItem('offlineCart');
+      console.log('Offline cart merged with backend cart successfully.');
+    } catch (err) {
+      console.error('Error merging offline cart:', err.message);
+      alert('Some items from the offline cart could not be added to the backend cart.');
+    }
+  }
+
+  // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -50,6 +87,7 @@ function Login() {
     await loginUser(email, password);
   };
 
+  // Handle registration form submission
   const handleRegister = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -86,6 +124,7 @@ function Login() {
     }
   };
 
+  // Handle logout
   const handleLogout = async () => {
     try {
       const response = await fetch('http://localhost:8080/logout', {

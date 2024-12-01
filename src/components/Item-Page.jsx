@@ -165,33 +165,60 @@ function Items() {
   // Add or update item in cart
   const handleAddToCart = async () => {
     try {
-      // First, remove the item from the cart (if it exists)
-      await fetch(`http://localhost:8080/api/cart/remove?productId=${id}`, {
+      // Try to add to the backend cart
+      const removeResponse = await fetch(`http://localhost:8080/api/cart/remove?productId=${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer YOUR_API_TOKEN_HERE",
+          "X-Requested-With": "XMLHttpRequest", // Prevent default login popup
         },
         credentials: "include",
       });
-
+  
+      if (removeResponse.status === 401) {
+        // Handle offline cart (store in localStorage)
+        const offlineCart = JSON.parse(localStorage.getItem("offlineCart")) || [];
+        const existingItemIndex = offlineCart.findIndex((item) => item.productId === id);
+  
+        if (existingItemIndex >= 0) {
+          // Update existing item's quantity
+          offlineCart[existingItemIndex].quantity += quantity;
+        } else {
+          // Add new item to offline cart
+          offlineCart.push({
+            productId: id,
+            title: item.title,
+            price: item.basePrice,
+            quantity,
+            image: logo, // Placeholder for product image
+          });
+        }
+  
+        localStorage.setItem("offlineCart", JSON.stringify(offlineCart));
+        setCartMessage("Item added to offline cart!");
+        setCartMessageType("success");
+        return;
+      }
+  
       // Then, add the item to the cart with the selected quantity
-      const response = await fetch(
+      const addResponse = await fetch(
         `http://localhost:8080/api/cart/cart/add?productId=${id}&quantity=${quantity}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer YOUR_API_TOKEN_HERE",
+            "X-Requested-With": "XMLHttpRequest", // Prevent default login popup
           },
           credentials: "include",
         }
       );
-
-      if (!response.ok) {
-        throw new Error(`Failed to add item to cart. Status: ${response.status}`);
+  
+      if (!addResponse.ok) {
+        throw new Error(`Failed to add item to cart. Status: ${addResponse.status}`);
       }
-
+  
       setCartMessage("Item successfully added to cart!");
       setCartMessageType("success");
     } catch (err) {
