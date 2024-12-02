@@ -13,53 +13,51 @@ function Profile() {
 
   const fetchData = async () => {
     try {
-      // Fetch user profile data
       const userResponse = await fetch('http://localhost:8080/api/user/profile', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer <your-token>', // Replace <your-token> with the actual token
+          Authorization: 'Bearer <your-token>',
         },
-        credentials: 'include', // Include credentials
+        credentials: 'include',
       });
 
       if (!userResponse.ok) throw new Error('Failed to fetch user details');
 
       const userData = await userResponse.json();
-      setUser(userData); // Set user data
+      setUser(userData);
     } catch (err) {
-      setProfileError(err.message); // Set profile fetch error
+      setProfileError(err.message);
     }
 
     try {
-      // Fetch user orders
       const ordersResponse = await fetch('http://localhost:8080/api/orders/user/orders', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer <your-token>', // Replace <your-token> with the actual token
+          Authorization: 'Bearer <your-token>',
         },
-        credentials: 'include', // Include credentials
+        credentials: 'include',
       });
 
       if (!ordersResponse.ok) throw new Error('There are no orders.');
 
       const ordersData = await ordersResponse.json();
-      setOrders(ordersData); // Set orders data
+      setOrders(ordersData);
     } catch (err) {
-      setOrdersError(err.message); // Set orders fetch error
+      setOrdersError(err.message);
     }
   };
 
   useEffect(() => {
-    fetchData(); // Fetch data when the component mounts
+    fetchData();
   }, []);
 
   const handleLogout = async () => {
     try {
       const response = await fetch('http://localhost:8080/logout', {
         method: 'GET',
-        credentials: 'include', // Include credentials
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -165,6 +163,9 @@ function OrderSummary({ order }) {
   const [comments, setComments] = useState({}); // To store comments for each item
   const contentRef = useRef(null);
 
+  const statusStages = ['PROCESSING', 'IN_TRANSIT', 'DELIVERED'];
+  const currentStageIndex = statusStages.indexOf(order.orderStatus);
+
   const handleCommentSubmit = async (productId, commentContent, rating) => {
     const commentPayload = {
       productId,
@@ -177,9 +178,9 @@ function OrderSummary({ order }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer <your-token>', // Replace <your-token> with the actual token
+          Authorization: 'Bearer <your-token>',
         },
-        credentials: 'include', // Include credentials
+        credentials: 'include',
         body: JSON.stringify(commentPayload),
       });
 
@@ -226,6 +227,29 @@ function OrderSummary({ order }) {
         </span>
       </div>
 
+      {/* Status Tracker */}
+          <div className="flex items-center justify-between mt-4 mb-6">
+            {statusStages.map((stage, index) => (
+              <div key={stage} className="text-center">
+                <div
+                  className={`w-8 h-8 rounded-full mx-auto ${
+                    index <= currentStageIndex ? 'bg-primary' : 'bg-gray-300'
+                  }`}
+                ></div>
+                <p className={`text-sm ${index <= currentStageIndex ? 'text-secondary' : 'text-gray-400'}`}>
+                  {stage}
+                </p>
+                {index < statusStages.length - 1 && (
+                  <div
+                    className={`h-1 w-12 mx-auto ${
+                      index < currentStageIndex ? 'bg-primary' : 'bg-gray-300'
+                    }`}
+                  ></div>
+                )}
+              </div>
+            ))}
+          </div>
+
       {/* Collapsible Order Details */}
       <div
         className="transition-all duration-500 ease-in-out overflow-hidden"
@@ -235,6 +259,8 @@ function OrderSummary({ order }) {
         }}
       >
         <div ref={contentRef}>
+          
+
           <h4 className="text-lg font-semibold text-gray-800 mt-4">Items</h4>
           <ul className="space-y-4 mt-4">
             {order.cart.cartItems.map((item, index) => (
@@ -268,7 +294,7 @@ function OrderSummary({ order }) {
                         key={star}
                         className="cursor-pointer"
                         style={{
-                          color: star <= (comments[item.product.id]?.rating || 0) ? '#96EFFF' : '#D1D5DB', // Custom color for selected and default gray
+                          color: star <= (comments[item.product.id]?.rating || 0) ? '#96EFFF' : '#D1D5DB',
                         }}
                         onClick={() => handleRatingChange(item.product.id, star)}
                       />
