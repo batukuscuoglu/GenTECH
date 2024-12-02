@@ -283,14 +283,6 @@ async function mergeOfflineCart() {
             </form>
           </div>
         </div>
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="mt-8 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition"
-        >
-          Logout
-        </button>
       </div>
     </div>
   );

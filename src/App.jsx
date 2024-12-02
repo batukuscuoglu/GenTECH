@@ -13,6 +13,7 @@ import AllProducts from './components/AllProducts';
 import PaymentConfirmation from './components/PaymentConfirmation';
 import ProductManager from './components/Product-Manager';
 import StatusTracking from './components/StatusTracking';
+import Profile from './components/profile';
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -36,6 +37,7 @@ function App() {
         <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
         <Route path="/product-manager" element={<ProductManager />} />
         <Route path="/status-tracking/:id" element={<StatusTracking />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
