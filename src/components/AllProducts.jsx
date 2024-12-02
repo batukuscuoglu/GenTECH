@@ -4,6 +4,7 @@ import Card from './Card';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import logo from '../assets/logo.png'; // Import the logo
+import mockIMG from '../assets/mockIMG.jpg';
 
 function AllProducts() {
   const [products, setProducts] = useState([]); // Products list
@@ -98,7 +99,7 @@ function AllProducts() {
                 key={item.id}
                 to={`/items/${item.id}`}
                 cardName={item.title}
-                imgSrc={logo} // Use logo as the image
+                imgSrc={mockIMG} // Use logo as the image
                 price={`$${item.basePrice}`}
               />
             ))

@@ -6,6 +6,8 @@ import phoneGif from '../assets/phone.gif'; // Import the phone GIF
 import './Home.css'; // Import the CSS
 import Footer from './Footer';
 import logo from '../assets/logo.png';
+import mockIMG from '../assets/mockIMG.jpg';
+
 
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -111,7 +113,7 @@ function Home() {
               key={product.id}
               cardName={product.title} // Use the title from the fetched data
               to={`/items/${product.id}`} // Link to the product's detail page
-              imgSrc={logo} // The image will be handled in the Card component
+              imgSrc={mockIMG} // The image will be handled in the Card component
               price={`$${product.basePrice}`} // Format the price
             />
           ))

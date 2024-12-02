@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import logo from '../assets/logo.png'; // Placeholder logo
+import mockIMG from '../assets/mockIMG.jpg';
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]); // Cart items state
@@ -194,7 +195,7 @@ function CartPage() {
                 >
                   <Link to={`/items/${productId}`} className="mr-4">
                     <img
-                      src={item.image || item.product.image || logo}
+                      src={item.image || item.product.image || mockIMG}
                       alt={item.title || item.product.title}
                       className="w-24 h-24 object-cover rounded-md"
                     />

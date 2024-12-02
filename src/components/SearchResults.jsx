@@ -4,6 +4,7 @@ import Navbar from './Navbar/Navbar';
 import Card from './Card';
 import Footer from './Footer';
 import logo from '../assets/logo.png'; // Importing logo.png as the placeholder image
+import mockIMG from '../assets/mockIMG.jpg';
 
 function SearchResults() {
   const location = useLocation();
@@ -64,7 +65,7 @@ function SearchResults() {
                 key={item.id}
                 to={`/items/${item.id}`}
                 cardName={item.title} // Use backend-provided title
-                imgSrc={logo} // Always use logo.png as the image
+                imgSrc={mockIMG} // Always use logo.png as the image
                 price={`$${item.basePrice}`} // Use backend-provided price
               />
             ))}

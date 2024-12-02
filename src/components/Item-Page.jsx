@@ -4,6 +4,7 @@ import Navbar from "./Navbar/Navbar";
 import Footer from "./Footer";
 import logo from "../assets/logo.png";
 import { FaStar, FaRegStar } from "react-icons/fa"; // For displaying star ratings
+import mockIMG from "../assets/mockIMG.jpg";
 
 function Items() {
   const { id } = useParams(); // Get the product ID from the URL
@@ -191,7 +192,7 @@ function Items() {
             title: item.title,
             price: item.basePrice,
             quantity,
-            image: logo, // Placeholder for product image
+            image: mockIMG, // Placeholder for product image
           });
         }
   
@@ -274,7 +275,7 @@ function Items() {
           <div className="md:w-1/2 flex justify-center mb-4 md:mb-0">
             {/* Always display the logo */}
             <img
-              src={logo}
+              src={mockIMG}
               alt={item.title}
               className="w-full max-w-md rounded-lg"
             />

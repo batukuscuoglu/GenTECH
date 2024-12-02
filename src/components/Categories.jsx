@@ -4,6 +4,8 @@ import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import Card from './Card';
 import logo from '../assets/logo.png';
+import mockIMG from '../assets/mockIMG.jpg';
+import mockCategory from '../assets/mockCategory.jpg';
 
 function Categories() {
   const [categories, setCategories] = useState([]); // Categories list
@@ -139,7 +141,7 @@ function Categories() {
                     key={product.id}
                     to={`/items/${product.id}`}
                     cardName={product.title}
-                    imgSrc={logo} // Always use logo.png
+                    imgSrc={mockIMG} // Always use logo.png
                     price={`$${product.basePrice}`}
                   />
                 ))
@@ -158,7 +160,7 @@ function Categories() {
                   onClick={() => handleCategoryClick(category)}
                   className="cursor-pointer transition-transform transform hover:scale-105 shadow-md rounded-lg overflow-hidden"
                 >
-                  <img src={logo} alt={category.name} className="w-60 h-40 object-cover" /> {/* Fixed imgSrc to src */}
+                  <img src={mockCategory} alt={category.name} className="w-60 h-40 object-cover" /> {/* Fixed imgSrc to src */}
                   <div className="bg-gray-800 text-white text-center p-2">
                     {category.name}
                   </div>
