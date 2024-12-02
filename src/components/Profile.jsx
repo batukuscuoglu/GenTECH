@@ -330,7 +330,7 @@ function OrderSummary({ order }) {
             ))}
             <hr className="my-4" />
             <p className="text-sm text-gray-800 font-bold">
-              <strong>Total Money Spent:</strong> ${order.total.toFixed(2)}
+              <strong>Total Cost:</strong> ${order.total.toFixed(2)}
             </p>
             <p className="text-sm text-gray-600">
               <strong>Order Created At:</strong> {new Date(order.createdAt).toLocaleString()}
