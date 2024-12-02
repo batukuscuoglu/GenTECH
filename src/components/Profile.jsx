@@ -2,56 +2,64 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
+import { FaStar } from 'react-icons/fa';
 
 function Profile() {
-  const [user, setUser] = useState(null);
-  const [orders, setOrders] = useState([]);
-  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null); // User data
+  const [orders, setOrders] = useState([]); // Orders data
+  const [ordersError, setOrdersError] = useState(null); // Error state for orders
+  const [profileError, setProfileError] = useState(null); // Error state for profile
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
+      // Fetch user profile data
       const userResponse = await fetch('http://localhost:8080/api/user/profile', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer <your-token>', // Replace <your-token> with the actual token
         },
-        credentials: 'include',
+        credentials: 'include', // Include credentials
       });
 
       if (!userResponse.ok) throw new Error('Failed to fetch user details');
 
       const userData = await userResponse.json();
-      setUser(userData);
+      setUser(userData); // Set user data
+    } catch (err) {
+      setProfileError(err.message); // Set profile fetch error
+    }
 
+    try {
+      // Fetch user orders
       const ordersResponse = await fetch('http://localhost:8080/api/orders/user/orders', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer <your-token>', // Replace <your-token> with the actual token
         },
-        credentials: 'include',
+        credentials: 'include', // Include credentials
       });
 
-      if (!ordersResponse.ok) throw new Error('Failed to fetch user orders');
+      if (!ordersResponse.ok) throw new Error('There are no orders.');
 
       const ordersData = await ordersResponse.json();
-      setOrders(ordersData);
+      setOrders(ordersData); // Set orders data
     } catch (err) {
-      setError(err.message);
+      setOrdersError(err.message); // Set orders fetch error
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(); // Fetch data when the component mounts
   }, []);
 
   const handleLogout = async () => {
     try {
       const response = await fetch('http://localhost:8080/logout', {
         method: 'GET',
-        credentials: 'include',
+        credentials: 'include', // Include credentials
       });
 
       if (response.ok) {
@@ -68,12 +76,12 @@ function Profile() {
     }
   };
 
-  if (error) {
+  if (profileError) {
     return (
       <>
         <Navbar />
         <div className="text-center text-red-500 mt-10">
-          <p>Error: {error}</p>
+          <p>Error: {profileError}</p>
         </div>
         <Footer />
       </>
@@ -108,7 +116,7 @@ function Profile() {
             </div>
             <div>
               <p className="text-lg text-gray-700">
-                <strong>Surname:</strong> {user.surname}
+                <strong>Surname:</strong> {user.surname || 'N/A'}
               </p>
               <p className="text-lg text-gray-700">
                 <strong>Phone:</strong> {user.phone}
@@ -126,7 +134,9 @@ function Profile() {
         {/* Orders Section */}
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Orders</h2>
         <div className="space-y-6">
-          {orders.length > 0 ? (
+          {ordersError ? (
+            <p className="text-gray-500">{ordersError}</p>
+          ) : orders.length > 0 ? (
             orders.map((order, index) => (
               <OrderSummary key={index} order={order} />
             ))
@@ -152,7 +162,48 @@ function Profile() {
 
 function OrderSummary({ order }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [comments, setComments] = useState({}); // To store comments for each item
   const contentRef = useRef(null);
+
+  const handleCommentSubmit = async (productId, commentContent, rating) => {
+    const commentPayload = {
+      productId,
+      content: commentContent,
+      rating,
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/api/comments/add-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer <your-token>', // Replace <your-token> with the actual token
+        },
+        credentials: 'include', // Include credentials
+        body: JSON.stringify(commentPayload),
+      });
+
+      if (response.ok) {
+        alert('Comment added successfully!');
+        setComments((prevComments) => ({
+          ...prevComments,
+          [productId]: { content: commentContent, rating },
+        }));
+      } else {
+        alert('Failed to add comment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+      alert('An error occurred while submitting the comment.');
+    }
+  };
+
+  const handleRatingChange = (productId, rating) => {
+    setComments((prev) => ({
+      ...prev,
+      [productId]: { ...prev[productId], rating },
+    }));
+  };
 
   return (
     <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6">
@@ -195,13 +246,55 @@ function OrderSummary({ order }) {
                 <p className="text-sm text-gray-600">
                   <strong>Price per Item:</strong> ${item.product.basePrice.toFixed(2)}
                 </p>
+
+                {/* Comment Section */}
+                <div className="mt-4">
+                  <h5 className="text-sm font-semibold text-gray-800">Add a Comment</h5>
+                  <textarea
+                    placeholder="Write your comment here..."
+                    className="w-full border rounded-md p-2 mt-2 mb-2"
+                    onChange={(e) =>
+                      setComments((prev) => ({
+                        ...prev,
+                        [item.product.id]: { ...prev[item.product.id], content: e.target.value },
+                      }))
+                    }
+                  ></textarea>
+
+                  {/* Star Rating */}
+                  <div className="flex items-center gap-1 mt-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar
+                        key={star}
+                        className="cursor-pointer"
+                        style={{
+                          color: star <= (comments[item.product.id]?.rating || 0) ? '#96EFFF' : '#D1D5DB', // Custom color for selected and default gray
+                        }}
+                        onClick={() => handleRatingChange(item.product.id, star)}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      handleCommentSubmit(
+                        item.product.id,
+                        comments[item.product.id]?.content || '',
+                        comments[item.product.id]?.rating || 0
+                      )
+                    }
+                    className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition mt-4"
+                  >
+                    Submit Comment
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
 
+          {/* Invoice Section */}
           <h4 className="text-lg font-semibold text-gray-800 mt-6">Invoice</h4>
           <div className="mt-4 bg-white p-4 pb-4 rounded-lg shadow-md">
-            {/* Items Breakdown */}
             {order.cart.cartItems.map((item, index) => (
               <p key={index} className="text-sm text-gray-600">
                 <strong>{item.product.title}:</strong> ${item.product.basePrice.toFixed(2)} x {item.quantity} = ${(
@@ -210,15 +303,12 @@ function OrderSummary({ order }) {
               </p>
             ))}
             <hr className="my-4" />
-            {/* Total */}
             <p className="text-sm text-gray-800 font-bold">
               <strong>Total Money Spent:</strong> ${order.total.toFixed(2)}
             </p>
-            {/* Order Date */}
             <p className="text-sm text-gray-600">
               <strong>Order Created At:</strong> {new Date(order.createdAt).toLocaleString()}
             </p>
-            {/* Delivery Address */}
             <p className="text-sm text-gray-600">
               <strong>Delivery Address:</strong> {order.address.street}, {order.address.city}, {order.address.country} ({order.address.zipCode})
             </p>
