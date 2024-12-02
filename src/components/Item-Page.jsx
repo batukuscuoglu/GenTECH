@@ -300,10 +300,10 @@ function Items() {
                 </span>
               </div>
             )}
-
+            
             <p className="text-xl mb-2">${item.basePrice}</p>
             <p className="text-lg mb-4">{item.description}</p>
-
+            <p>Stock: {item.quantityInStock}</p>
             {item.quantityInStock > 0 ? (
               <>
                 {/* Quantity Selector Dropdown */}

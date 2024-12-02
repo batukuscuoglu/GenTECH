@@ -66,7 +66,7 @@ function CartPage() {
       );
       setCartItems(offlineCart);
       setTotalAmount(offlineTotal);
-      setError('Failed to fetch cart. Showing offline cart instead.');
+      setError('No items in the cart.');
     } finally {
       setLoading(false);
     }
@@ -163,7 +163,7 @@ function CartPage() {
         {loading ? (
           <p className="text-center text-xl">Loading cart...</p>
         ) : error ? (
-          <p className="text-center text-xl text-red-500">{error}</p>
+          <p className="text-center text-xl text-gray-500">{error}</p>
         ) : cartItems.length === 0 ? (
           <p className="text-center text-xl text-gray-500">Your cart is currently empty.</p>
         ) : (
