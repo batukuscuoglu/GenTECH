@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NavbarMenu } from '../../mockData/data';
 import { CiSearch } from 'react-icons/ci';
@@ -11,13 +11,31 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  // Check login status on component mount
+  useEffect(() => {
+    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loggedInStatus);
+  }, []);
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
       navigate(`/search?query=${searchQuery}`);
       setSearchQuery('');
       setSearchOpen(false);
+    }
+  };
+
+  const handleAuthAction = () => {
+    if (isLoggedIn) {
+      // Logout logic
+      localStorage.setItem('isLoggedIn', 'false');
+      setIsLoggedIn(false);
+      navigate('/login');
+    } else {
+      navigate('/login');
     }
   };
 
@@ -54,13 +72,13 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             {searchOpen && (
               <input
-              type="text"
-              placeholder="Search items..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearch}
-              className="border-2 border-primary p-2 rounded-md text-black w-48 transition-all duration-200 focus:border-secondary hover:border-secondary bg-white focus:outline-none focus:ring-2 focus:ring-secondary z-10"
-            />
+                type="text"
+                placeholder="Search items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
+                className="border-2 border-primary p-2 rounded-md text-black w-48 transition-all duration-200 focus:border-secondary hover:border-secondary bg-white focus:outline-none focus:ring-2 focus:ring-secondary z-10"
+              />
             )}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
@@ -73,9 +91,16 @@ const Navbar = () => {
                 <PiShoppingCart />
               </button>
             </a>
-            <a href="/login">
-              <button className="hover:bg-primary text-primary font-semibold hover:text-white rounded-md border-2 border-primary py-2 px-6 duration-200 hidden md:block">
-                Login
+            <a href={isLoggedIn ? '/profile' : '/login'}>
+              <button
+                onClick={isLoggedIn ? null : handleAuthAction}
+                className={`hover:bg-primary ${
+                  isLoggedIn ? 'text-secondary' : 'text-primary'
+                } font-semibold hover:text-white rounded-md border-2 ${
+                  isLoggedIn ? 'border-secondary' : 'border-primary'
+                } py-2 px-6 duration-200 hidden md:block`}
+              >
+                {isLoggedIn ? 'Profile' : 'Login'}
               </button>
             </a>
           </div>

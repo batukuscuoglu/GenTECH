@@ -62,7 +62,8 @@ function Profile() {
 
       if (response.ok) {
         alert('Logged out successfully!');
-        navigate('/');
+        localStorage.setItem('isLoggedIn', 'false'); // Update localStorage to reflect logged-out state
+        navigate('/login'); // Redirect to login page
       } else {
         const errorText = await response.text();
         console.error('Logout Error:', errorText);
@@ -222,33 +223,35 @@ function OrderSummary({ order }) {
             <strong>Total Price:</strong> ${order.cart?.totalPrice.toFixed(2) || '0.00'}
           </p>
         </div>
-        <span className="text-secondary text-lg">
-          {isExpanded ? '▲' : '▼'}
-        </span>
+        <span className="text-secondary text-lg">{isExpanded ? '▲' : '▼'}</span>
       </div>
 
       {/* Status Tracker */}
-          <div className="flex items-center justify-between mt-4 mb-6">
-            {statusStages.map((stage, index) => (
-              <div key={stage} className="text-center">
-                <div
-                  className={`w-8 h-8 rounded-full mx-auto ${
-                    index <= currentStageIndex ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                ></div>
-                <p className={`text-sm ${index <= currentStageIndex ? 'text-secondary' : 'text-gray-400'}`}>
-                  {stage}
-                </p>
-                {index < statusStages.length - 1 && (
-                  <div
-                    className={`h-1 w-12 mx-auto ${
-                      index < currentStageIndex ? 'bg-primary' : 'bg-gray-300'
-                    }`}
-                  ></div>
-                )}
-              </div>
-            ))}
+      <div className="flex items-center justify-between mt-4 mb-6">
+        {statusStages.map((stage, index) => (
+          <div key={stage} className="text-center">
+            <div
+              className={`w-8 h-8 rounded-full mx-auto ${
+                index <= currentStageIndex ? 'bg-primary' : 'bg-gray-300'
+              }`}
+            ></div>
+            <p
+              className={`text-sm ${
+                index <= currentStageIndex ? 'text-secondary' : 'text-gray-400'
+              }`}
+            >
+              {stage}
+            </p>
+            {index < statusStages.length - 1 && (
+              <div
+                className={`h-1 w-12 mx-auto ${
+                  index < currentStageIndex ? 'bg-primary' : 'bg-gray-300'
+                }`}
+              ></div>
+            )}
           </div>
+        ))}
+      </div>
 
       {/* Collapsible Order Details */}
       <div
@@ -259,16 +262,22 @@ function OrderSummary({ order }) {
         }}
       >
         <div ref={contentRef}>
-          
-
           <h4 className="text-lg font-semibold text-gray-800 mt-4">Items</h4>
           <ul className="space-y-4 mt-4">
             {order.cart.cartItems.map((item, index) => (
               <li key={index} className="bg-white p-4 rounded-lg shadow-md">
-                <p className="text-base font-semibold">{item.product.title} ({item.product.model})</p>
-                <p className="text-sm text-gray-600"><strong>Brand:</strong> {item.product.brand}</p>
-                <p className="text-sm text-gray-600"><strong>Serial Number:</strong> {item.product.serialNumber}</p>
-                <p className="text-sm text-gray-600"><strong>Quantity:</strong> {item.quantity}</p>
+                <p className="text-base font-semibold">
+                  {item.product.title} ({item.product.model})
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Brand:</strong> {item.product.brand}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Serial Number:</strong> {item.product.serialNumber}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Quantity:</strong> {item.quantity}
+                </p>
                 <p className="text-sm text-gray-600">
                   <strong>Price per Item:</strong> ${item.product.basePrice.toFixed(2)}
                 </p>

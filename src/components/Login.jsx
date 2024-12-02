@@ -33,8 +33,9 @@ function Login() {
 
       if (data.status === 'success') {
         alert(data.message || 'Login successful!');
+        localStorage.setItem('isLoggedIn', 'true'); // Update localStorage to reflect logged-in state
         await mergeOfflineCart(); // Merge offline cart with backend cart
-        navigate('/');
+        navigate('/profile'); // Redirect to the profile page
       } else {
         alert(data.message || 'Login failed.');
       }
@@ -168,28 +169,6 @@ function Login() {
     } catch (error) {
       console.error('Unexpected Registration Error:', error.message);
       alert('An unexpected error occurred during registration.');
-    }
-  };
-
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/logout', {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        alert('Logged out successfully!');
-        navigate('/');
-      } else {
-        const errorText = await response.text();
-        console.error('Logout Error:', errorText);
-        alert('Failed to log out. Please try again.');
-      }
-    } catch (error) {
-      console.error('Unexpected Logout Error:', error.message);
-      alert('An unexpected error occurred during logout.');
     }
   };
 
