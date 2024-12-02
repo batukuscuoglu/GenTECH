@@ -52,6 +52,30 @@ function CheckoutPage() {
     fetchCartItems();
   }, []);
 
+  // Function to send address
+  const sendAddress = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/account/address', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer YOUR_API_TOKEN_HERE',
+        },
+        credentials: 'include',
+        body: JSON.stringify(address),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to send address. ${errorText}`);
+      }
+      console.log('Address saved successfully.');
+    } catch (err) {
+      console.error('Error saving address:', err.message);
+      throw new Error('Address submission failed. Please check your details and try again.');
+    }
+  };
+
   // Place Order
   const handlePlaceOrder = async () => {
     const isAddressFilled = Object.entries(address).every(
@@ -77,6 +101,8 @@ function CheckoutPage() {
     }
 
     try {
+      await sendAddress(); // Send address before placing the order
+
       const payload = {
         address,
         cartItems: cartItems.map((item) => ({

@@ -10,7 +10,29 @@ function CartPage() {
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [stockData, setStockData] = useState([]); // Store stock info
   const navigate = useNavigate();
+
+  // Fetch stock data for all products
+  const fetchStockData = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/product/get-all-products', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStockData(data); // Store the stock information
+      } else {
+        throw new Error('Failed to fetch product data.');
+      }
+    } catch (err) {
+      console.error('Error fetching stock data:', err.message);
+    }
+  };
 
   // Fetch cart items from the backend or localStorage
   const fetchCart = async () => {
@@ -27,7 +49,6 @@ function CartPage() {
       });
 
       if (response.status === 401 || response.status === 403) {
-        // User is not logged in, fallback to offline cart
         const offlineCart = JSON.parse(localStorage.getItem('offlineCart')) || [];
         const offlineTotal = offlineCart.reduce(
           (acc, item) => acc + (item.price || 0) * (item.quantity || 0),
@@ -44,7 +65,6 @@ function CartPage() {
         throw new Error(`Failed to fetch cart. Status: ${response.status}`);
       }
 
-      // User is logged in, update cart
       const data = await response.json();
       setCartItems(data.cartItems || []);
       setTotalAmount(
@@ -57,8 +77,6 @@ function CartPage() {
       setError(null);
     } catch (err) {
       console.error('Error fetching cart:', err.message);
-
-      // Fallback to offline cart in case of error
       const offlineCart = JSON.parse(localStorage.getItem('offlineCart')) || [];
       const offlineTotal = offlineCart.reduce(
         (acc, item) => acc + (item.price || 0) * (item.quantity || 0),
@@ -97,7 +115,6 @@ function CartPage() {
         console.error('Error updating quantity:', err.message);
       }
     } else {
-      // Offline cart
       const offlineCart = JSON.parse(localStorage.getItem('offlineCart')) || [];
       const updatedCart = offlineCart.map((item) =>
         item.productId === productId ? { ...item, quantity: newQuantity } : item
@@ -107,7 +124,6 @@ function CartPage() {
     }
   };
 
-  // Handle remove item for logged-in and offline users
   const handleRemoveItem = async (productId) => {
     if (isLoggedIn) {
       try {
@@ -132,7 +148,6 @@ function CartPage() {
         console.error('Error removing item:', err.message);
       }
     } else {
-      // Offline cart
       const offlineCart = JSON.parse(localStorage.getItem('offlineCart')) || [];
       const updatedCart = offlineCart.filter((item) => item.productId !== productId);
       localStorage.setItem('offlineCart', JSON.stringify(updatedCart));
@@ -140,7 +155,6 @@ function CartPage() {
     }
   };
 
-  // Handle proceed to checkout
   const handleProceedToCheckout = () => {
     if (!isLoggedIn) {
       alert('Please log in to proceed to checkout.');
@@ -150,9 +164,9 @@ function CartPage() {
     }
   };
 
-  // Fetch cart items on component mount
   useEffect(() => {
-    fetchCart();
+    fetchStockData(); // Fetch product stock data
+    fetchCart(); // Fetch cart items
   }, []);
 
   return (
@@ -168,58 +182,66 @@ function CartPage() {
           <p className="text-center text-xl text-gray-500">Your cart is currently empty.</p>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {cartItems.map((item) => (
-              <div
-                key={item.productId || item.product.id}
-                className="flex items-center border-b pb-4 mb-4 border-gray-300"
-              >
-                <Link to={`/items/${item.productId || item.product.id}`} className="mr-4">
-                  <img
-                    src={item.image || item.product.image || logo} // Use provided image or fallback to logo
-                    alt={item.title || item.product.title}
-                    className="w-24 h-24 object-cover rounded-md"
-                  />
-                </Link>
-                <div className="flex-1">
-                  <Link to={`/items/${item.productId || item.product.id}`} className="block">
-                    <h2 className="text-xl font-semibold hover:underline">
-                      {item.title || item.product.title}
-                    </h2>
+            {cartItems.map((item) => {
+              const productId = item.productId || item.product.id;
+              const stockItem = stockData.find((product) => product.id === productId);
+              const maxQuantity = stockItem?.quantityInStock || 10; // Use fetched stock data
+
+              return (
+                <div
+                  key={productId}
+                  className="flex items-center border-b pb-4 mb-4 border-gray-300"
+                >
+                  <Link to={`/items/${productId}`} className="mr-4">
+                    <img
+                      src={item.image || item.product.image || logo}
+                      alt={item.title || item.product.title}
+                      className="w-24 h-24 object-cover rounded-md"
+                    />
                   </Link>
-                  <p className="text-gray-500">${(item.price || item.product.basePrice).toFixed(2)}</p>
-                  <div className="mt-2">
-                    <label htmlFor={`quantity-${item.productId || item.product.id}`} className="mr-2">
-                      Quantity:
-                    </label>
-                    <select
-                      id={`quantity-${item.productId || item.product.id}`}
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleQuantityChange(item.productId || item.product.id, parseInt(e.target.value))
-                      }
-                      className="border rounded-md p-1"
+                  <div className="flex-1">
+                    <Link to={`/items/${productId}`} className="block">
+                      <h2 className="text-xl font-semibold hover:underline">
+                        {item.title || item.product.title}
+                      </h2>
+                    </Link>
+                    <p className="text-gray-500">${(item.price || item.product.basePrice).toFixed(2)}</p>
+                    <div className="mt-2 flex items-center">
+                      <button
+                        onClick={() =>
+                          handleQuantityChange(productId, Math.max(1, item.quantity - 1))
+                        }
+                        className="px-2 py-1 border rounded-md"
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="mx-2">{item.quantity}</span>
+                      <button
+                        onClick={() =>
+                          handleQuantityChange(productId, Math.min(maxQuantity, item.quantity + 1))
+                        }
+                        className="px-2 py-1 border rounded-md"
+                        disabled={item.quantity >= maxQuantity}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <p className="text-lg font-bold">
+                      ${((item.price || item.product.basePrice) * item.quantity).toFixed(2)}
+                    </p>
+                    <button
+                      onClick={() => handleRemoveItem(productId)}
+                      className="text-red-500 mt-2 hover:underline"
                     >
-                      {[...Array(10).keys()].map((num) => (
-                        <option key={num + 1} value={num + 1}>
-                          {num + 1}
-                        </option>
-                      ))}
-                    </select>
+                      Remove
+                    </button>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <p className="text-lg font-bold">
-                    ${((item.price || item.product.basePrice) * item.quantity).toFixed(2)}
-                  </p>
-                  <button
-                    onClick={() => handleRemoveItem(item.productId || item.product.id)}
-                    className="text-red-500 mt-2 hover:underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             <div className="text-right font-bold text-2xl">
               Total: ${totalAmount.toFixed(2)}
             </div>

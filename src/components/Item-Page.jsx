@@ -183,7 +183,7 @@ function Items() {
   
         if (existingItemIndex >= 0) {
           // Update existing item's quantity
-          offlineCart[existingItemIndex].quantity += quantity;
+          
         } else {
           // Add new item to offline cart
           offlineCart.push({
