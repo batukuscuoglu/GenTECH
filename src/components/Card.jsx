@@ -46,10 +46,6 @@ const Card = ({ to, cardName, imgSrc, price }) => {
         <div className="text-white font-semibold text-sm">{price}</div>
       </div>
       
-      {/* Full-width Add to Cart Button */}
-      <button className="w-full bg-gray-600 text-white py-2 transition-colors duration-300 hover:bg-gray-700">
-        Add to Cart
-      </button>
     </div>
   );
 };
