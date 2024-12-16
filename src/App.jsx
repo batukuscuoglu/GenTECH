@@ -11,9 +11,10 @@ import CheckoutPage from './components/CheckoutPage';
 import SearchResults from './components/SearchResults';
 import AllProducts from './components/AllProducts';
 import PaymentConfirmation from './components/PaymentConfirmation';
-import ProductManager from './components/Product-Manager';
 import StatusTracking from './components/StatusTracking';
 import Profile from './components/profile';
+import SalesManager from './components/SalesManager';
+import ProductManager from './components/ProductManager';
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -36,6 +37,7 @@ function App() {
         <Route path="/all-products" element={<AllProducts />} />
         <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
         <Route path="/product-manager" element={<ProductManager />} />
+        <Route path="/sales-manager" element={<SalesManager />} />
         <Route path="/status-tracking/:id" element={<StatusTracking />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
