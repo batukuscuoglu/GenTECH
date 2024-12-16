@@ -97,7 +97,7 @@ const Navbar = () => {
                 className={`hover:bg-primary ${
                   isLoggedIn ? 'text-secondary' : 'text-primary'
                 } font-semibold hover:text-white rounded-md border-2 ${
-                  isLoggedIn ? 'border-secondary' : 'border-primary'
+                  isLoggedIn ? 'border-primary' : 'border-primary'
                 } py-2 px-6 duration-200 hidden md:block`}
               >
                 {isLoggedIn ? 'Profile' : 'Login'}
