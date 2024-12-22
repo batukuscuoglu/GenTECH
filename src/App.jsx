@@ -15,6 +15,7 @@ import StatusTracking from './components/StatusTracking';
 import Profile from './components/profile';
 import SalesManager from './components/Sales-Manager/SalesManager';
 import ProductManager from './components/Product-Manager/ProductManager';
+import Wishlist from './components/Wishlist';
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -40,6 +41,7 @@ function App() {
         <Route path="/sales-manager" element={<SalesManager />} />
         <Route path="/status-tracking/:id" element={<StatusTracking />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
     </Router>
   );

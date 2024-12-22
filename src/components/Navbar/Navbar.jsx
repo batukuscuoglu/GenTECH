@@ -5,6 +5,7 @@ import { CiSearch } from 'react-icons/ci';
 import { MdMenu } from 'react-icons/md';
 import { GrTechnology } from 'react-icons/gr';
 import { PiShoppingCart } from 'react-icons/pi';
+import { FaRegHeart } from 'react-icons/fa'; // Import the heart icon
 import ResponsiveMenu from './ResponsiveMenu';
 
 const Navbar = () => {
@@ -80,17 +81,31 @@ const Navbar = () => {
                 className="border-2 border-primary p-2 rounded-md text-black w-48 transition-all duration-200 focus:border-secondary hover:border-secondary bg-white focus:outline-none focus:ring-2 focus:ring-secondary z-10"
               />
             )}
+            {/* Search Icon */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               className="text-2xl hover:bg-primary hover:text-white rounded-full p-2 duration-200"
             >
               <CiSearch />
             </button>
+
+            {/* Wishlist Icon (visible only when logged in) */}
+            {isLoggedIn && (
+              <a href="/wishlist">
+                <button className="text-2xl hover:bg-primary hover:text-white rounded-full p-2 duration-200">
+                  <FaRegHeart />
+                </button>
+              </a>
+            )}
+
+            {/* Cart Icon */}
             <a href="/cart">
               <button className="text-2xl hover:bg-primary hover:text-white rounded-full p-2 duration-200">
                 <PiShoppingCart />
               </button>
             </a>
+
+            {/* Profile/Login Button */}
             <a href={isLoggedIn ? '/profile' : '/login'}>
               <button
                 onClick={isLoggedIn ? null : handleAuthAction}
