@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import commentsData from '../mockData/commentsData';
-import Navbar from './Navbar/Navbar';
-import Footer from './Footer';
+import commentsData from '../../mockData/commentsData';
+import Navbar from '../Navbar/Navbar';
+import Footer from '../Footer';
 
 function ProductManager() {
   const [comments, setComments] = useState(commentsData);

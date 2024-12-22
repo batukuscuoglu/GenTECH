@@ -66,7 +66,7 @@ function Home() {
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 3200);
 
     return () => clearInterval(slideInterval);
   }, [slides.length]);

@@ -13,8 +13,8 @@ import AllProducts from './components/AllProducts';
 import PaymentConfirmation from './components/PaymentConfirmation';
 import StatusTracking from './components/StatusTracking';
 import Profile from './components/profile';
-import SalesManager from './components/SalesManager';
-import ProductManager from './components/ProductManager';
+import SalesManager from './components/Sales-Manager/SalesManager';
+import ProductManager from './components/Product-Manager/ProductManager';
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
