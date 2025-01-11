@@ -48,7 +48,7 @@ const ProductManager = () => {
             <div
               onClick={() => toggleSection(index)}
               className="flex items-center justify-between text-xl font-semibold cursor-pointer mb-2 p-4 rounded-md transition-all duration-300 
-                bg-primary text-white hover:bg-white hover:text-primary hover:border-2 hover:border-primary shadow-md"
+                bg-secondary text-white hover:bg-white hover:text-secondary hover:border-2 hover:border-secondary shadow-md"
             >
               {section.title}
               <span className="ml-2 text-lg">
