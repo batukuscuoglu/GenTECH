@@ -10,28 +10,63 @@ const WishlistPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch wishlist items (currently mocked; backend logic can be added later)
+  // Fetch product details for the wishlist
+  const fetchProductDetails = async (productId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/product/${productId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch product details for ID: ${productId}`);
+      }
+
+      const productData = await response.json();
+      return {
+        id: productData.id,
+        title: productData.title,
+        price: productData.basePrice,
+        image: productData.image ? `data:image/jpeg;base64,${productData.image}` : mockIMG,
+        liked: true, // Default liked state
+      };
+    } catch (err) {
+      console.error('Error fetching product details:', err.message);
+      return null;
+    }
+  };
+
+  // Fetch wishlist items
   const fetchWishlist = async () => {
     setLoading(true);
     try {
-      // Simulate a fetch request; replace this with actual API logic
-      const mockData = [
-        {
-          productId: 1,
-          title: 'Sample Product 1',
-          price: 49.99,
-          image: mockIMG,
-          liked: true, // Initial liked state
+      const response = await fetch('http://localhost:8080/api/wishlist', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
         },
-        {
-          productId: 2,
-          title: 'Sample Product 2',
-          price: 79.99,
-          image: mockIMG,
-          liked: true, // Initial liked state
-        },
-      ];
-      setWishlistItems(mockData);
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch wishlist.');
+      }
+
+      const wishlistData = await response.json();
+      const productDetailsPromises = wishlistData.productIds.map((id) =>
+        fetchProductDetails(id)
+      );
+      const products = (await Promise.all(productDetailsPromises)).filter(Boolean);
+
+      setWishlistItems(products);
       setError(null);
     } catch (err) {
       console.error('Error fetching wishlist:', err.message);
@@ -41,13 +76,32 @@ const WishlistPage = () => {
     }
   };
 
-  // Toggle the liked state of an item
-  const toggleLike = (productId) => {
-    const updatedWishlist = wishlistItems.map((item) =>
-      item.productId === productId ? { ...item, liked: !item.liked } : item
-    );
-    setWishlistItems(updatedWishlist);
-    // Backend update logic for like state can be added here
+  // Remove item from wishlist
+  const removeFromWishlist = async (productId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/wishlist/remove?productId=${productId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer YOUR_API_TOKEN_HERE', // Replace with actual token
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to remove product with ID: ${productId}`);
+      }
+
+      // Update the wishlist state after removal
+      setWishlistItems((prevItems) =>
+        prevItems.filter((item) => item.id !== productId)
+      );
+    } catch (err) {
+      console.error('Error removing item from wishlist:', err.message);
+    }
   };
 
   useEffect(() => {
@@ -69,32 +123,28 @@ const WishlistPage = () => {
           <div className="grid grid-cols-1 gap-6">
             {wishlistItems.map((item) => (
               <div
-                key={item.productId}
+                key={item.id}
                 className="flex items-center border-b pb-4 mb-4 border-gray-300"
               >
-                <Link to={`/items/${item.productId}`} className="mr-4">
+                <Link to={`/items/${item.id}`} className="mr-4">
                   <img
-                    src={item.image || mockIMG}
+                    src={item.image}
                     alt={item.title}
                     className="w-24 h-24 object-cover rounded-md"
                   />
                 </Link>
                 <div className="flex-1">
-                  <Link to={`/items/${item.productId}`} className="block">
+                  <Link to={`/items/${item.id}`} className="block">
                     <h2 className="text-xl font-semibold hover:underline">{item.title}</h2>
                   </Link>
                   <p className="text-gray-500">${item.price.toFixed(2)}</p>
                 </div>
                 <div className="flex flex-col items-end">
                   <button
-                    onClick={() => toggleLike(item.productId)}
+                    onClick={() => removeFromWishlist(item.id)}
                     className="text-xl hover:scale-110 transition-transform duration-200"
                   >
-                    {item.liked ? (
-                      <FaHeart className="text-primary" />
-                    ) : (
-                      <FaRegHeart className="text-secondary" />
-                    )}
+                    <FaHeart className="text-primary" />
                   </button>
                 </div>
               </div>
