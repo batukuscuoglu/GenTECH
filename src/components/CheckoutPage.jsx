@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
-import logo from '../assets/logo.png';
 
 function CheckoutPage() {
   const navigate = useNavigate();
@@ -159,7 +158,11 @@ function CheckoutPage() {
                   >
                     <Link to={`/items/${item.product.id}`} className="flex items-center">
                       <img
-                        src={logo} // Use logo.png as the image
+                        src={
+                          item.product.image
+                            ? `data:image/jpeg;base64,${item.product.image}` // Use dynamic image from backend
+                            : logo // Fallback to logo if no image is provided
+                        }
                         alt={item.product.title}
                         className="w-20 h-20 object-cover rounded-md mr-4"
                       />
