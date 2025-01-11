@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
-import logo from '../assets/logo.png'; // Placeholder logo
 import mockIMG from '../assets/mockIMG.jpg';
 
 function CartPage() {
@@ -11,27 +10,31 @@ function CartPage() {
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
-  const [stockData, setStockData] = useState([]); // Store stock info
   const navigate = useNavigate();
 
-  // Fetch stock data for all products
-  const fetchStockData = async () => {
+  // Fetch product data (including image) using the search API
+  const fetchProductData = async (query) => {
     try {
-      const response = await fetch('http://localhost:8080/api/product/get-all-products', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/product/search?query=${encodeURIComponent(query)}&page=0&size=1`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include credentials for authentication
+        }
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        setStockData(data); // Store the stock information
-      } else {
-        throw new Error('Failed to fetch product data.');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch product data for ${query}`);
       }
+
+      const data = await response.json();
+      return data.content[0] || null; // Return the first matching product
     } catch (err) {
-      console.error('Error fetching stock data:', err.message);
+      console.error('Error fetching product data:', err.message);
+      return null; // Return null if the product is not found
     }
   };
 
@@ -50,7 +53,14 @@ function CartPage() {
       });
 
       if (response.status === 401 || response.status === 403) {
+        // Offline cart handling
         const offlineCart = JSON.parse(localStorage.getItem('offlineCart')) || [];
+        for (const item of offlineCart) {
+          if (!item.product?.image) {
+            const productData = await fetchProductData(item.title);
+            item.product = { ...item.product, image: productData?.image || null };
+          }
+        }
         const offlineTotal = offlineCart.reduce(
           (acc, item) => acc + (item.price || 0) * (item.quantity || 0),
           0
@@ -91,7 +101,6 @@ function CartPage() {
     }
   };
 
-  // Handle quantity change for logged-in and offline users
   const handleQuantityChange = async (productId, newQuantity) => {
     if (isLoggedIn) {
       try {
@@ -166,7 +175,6 @@ function CartPage() {
   };
 
   useEffect(() => {
-    fetchStockData(); // Fetch product stock data
     fetchCart(); // Fetch cart items
   }, []);
 
@@ -183,66 +191,63 @@ function CartPage() {
           <p className="text-center text-xl text-gray-500">Your cart is currently empty.</p>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {cartItems.map((item) => {
-              const productId = item.productId || item.product.id;
-              const stockItem = stockData.find((product) => product.id === productId);
-              const maxQuantity = stockItem?.quantityInStock || 10; // Use fetched stock data
-
-              return (
-                <div
-                  key={productId}
-                  className="flex items-center border-b pb-4 mb-4 border-gray-300"
-                >
-                  <Link to={`/items/${productId}`} className="mr-4">
-                    <img
-                      src={item.image || item.product.image || mockIMG}
-                      alt={item.title || item.product.title}
-                      className="w-24 h-24 object-cover rounded-md"
-                    />
+            {cartItems.map((item) => (
+              <div
+                key={item.productId || item.product?.id}
+                className="flex items-center border-b pb-4 mb-4 border-gray-300"
+              >
+                <Link to={`/items/${item.productId || item.product?.id}`} className="mr-4">
+                  <img
+                    src={item.product?.image ? `data:image/jpeg;base64,${item.product.image}` : mockIMG}
+                    alt={item.product?.title || 'Product Image'}
+                    className="w-24 h-24 object-cover rounded-md"
+                  />
+                </Link>
+                <div className="flex-1">
+                  <Link to={`/items/${item.productId || item.product?.id}`} className="block">
+                    <h2 className="text-xl font-semibold hover:underline">
+                      {item.title || item.product?.title || 'Unknown Item'}
+                    </h2>
                   </Link>
-                  <div className="flex-1">
-                    <Link to={`/items/${productId}`} className="block">
-                      <h2 className="text-xl font-semibold hover:underline">
-                        {item.title || item.product.title}
-                      </h2>
-                    </Link>
-                    <p className="text-gray-500">${(item.price || item.product.basePrice).toFixed(2)}</p>
-                    <div className="mt-2 flex items-center">
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(productId, Math.max(1, item.quantity - 1))
-                        }
-                        className="px-2 py-1 border rounded-md"
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <span className="mx-2">{item.quantity}</span>
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(productId, Math.min(maxQuantity, item.quantity + 1))
-                        }
-                        className="px-2 py-1 border rounded-md"
-                        disabled={item.quantity >= maxQuantity}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <p className="text-lg font-bold">
-                      ${((item.price || item.product.basePrice) * item.quantity).toFixed(2)}
-                    </p>
+                  <p className="text-gray-500">${(item.price || item.product?.basePrice || 0).toFixed(2)}</p>
+                  <div className="mt-2 flex items-center">
                     <button
-                      onClick={() => handleRemoveItem(productId)}
-                      className="text-red-500 mt-2 hover:underline"
+                      onClick={() =>
+                        handleQuantityChange(item.productId || item.product?.id, Math.max(1, item.quantity - 1))
+                      }
+                      className="px-2 py-1 border rounded-md"
+                      disabled={item.quantity <= 1}
                     >
-                      Remove
+                      -
+                    </button>
+                    <span className="mx-2">{item.quantity}</span>
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.productId || item.product?.id,
+                          Math.min(10, item.quantity + 1)
+                        )
+                      }
+                      className="px-2 py-1 border rounded-md"
+                      disabled={item.quantity >= 10}
+                    >
+                      +
                     </button>
                   </div>
                 </div>
-              );
-            })}
+                <div className="flex flex-col items-end">
+                  <p className="text-lg font-bold">
+                    ${((item.price || item.product?.basePrice || 0) * item.quantity).toFixed(2)}
+                  </p>
+                  <button
+                    onClick={() => handleRemoveItem(item.productId || item.product?.id)}
+                    className="text-red-500 mt-2 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
             <div className="text-right font-bold text-2xl">
               Total: ${totalAmount.toFixed(2)}
             </div>

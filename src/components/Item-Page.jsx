@@ -275,9 +275,9 @@ function Items() {
           <div className="md:w-1/2 flex justify-center mb-4 md:mb-0">
             {/* Always display the logo */}
             <img
-              src={mockIMG}
-              alt={item.title}
-              className="w-full max-w-md rounded-lg"
+            src={item && item.image ? `data:image/jpeg;base64,${item.image}` : mockIMG}
+            alt={item?.title || "Product Image"}
+            className="w-full max-w-md rounded-lg"
             />
           </div>
 

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Footer from './Footer';
 import Card from './Card';
-import logo from '../assets/logo.png';
 import mockIMG from '../assets/mockIMG.jpg';
 import mockCategory from '../assets/mockCategory.jpg';
 
@@ -141,7 +140,7 @@ function Categories() {
                     key={product.id}
                     to={`/items/${product.id}`}
                     cardName={product.title}
-                    imgSrc={mockIMG} // Always use logo.png
+                    imgSrc={product.image ? `data:image/jpeg;base64,${product.image}` : mockIMG}
                     price={`$${product.basePrice}`}
                   />
                 ))

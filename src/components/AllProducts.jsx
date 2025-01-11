@@ -99,7 +99,7 @@ function AllProducts() {
                 key={item.id}
                 to={`/items/${item.id}`}
                 cardName={item.title}
-                imgSrc={mockIMG} // Use logo as the image
+                imgSrc={item.image ? `data:image/jpeg;base64,${item.image}` : mockIMG} // Use database image or fallback to mockIMG
                 price={`$${item.basePrice}`}
               />
             ))

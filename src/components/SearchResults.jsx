@@ -65,7 +65,7 @@ function SearchResults() {
                 key={item.id}
                 to={`/items/${item.id}`}
                 cardName={item.title} // Use backend-provided title
-                imgSrc={mockIMG} // Always use logo.png as the image
+                imgSrc={item.image ? `data:image/jpeg;base64,${item.image}` : mockIMG} // Use backend-provided image
                 price={`$${item.basePrice}`} // Use backend-provided price
               />
             ))}
