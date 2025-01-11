@@ -5,6 +5,7 @@ import Footer from "./Footer";
 import logo from "../assets/logo.png";
 import { FaStar, FaRegStar } from "react-icons/fa"; // For displaying star ratings
 import mockIMG from "../assets/mockIMG.jpg";
+import WishlistItemPage from "./item-page-wishlist";
 
 function Items() {
   const { id } = useParams(); // Get the product ID from the URL
@@ -304,7 +305,16 @@ function Items() {
             
             <p className="text-xl mb-2">${item.basePrice}</p>
             <p className="text-lg mb-4">{item.description}</p>
-            <p>Stock: {item.quantityInStock}</p>
+            <p className="text-lg mb-2">
+              <span className="font-bold">Model:</span> {item.model}
+            </p>
+            <p className="text-lg mb-2">
+              <span className="font-bold">Serial No:</span> {item.serialNumber}
+            </p>
+            <p className="text-lg mb-2">
+              <span className="font-bold">Warranty:</span> {item.warrantyStatus ? "2 years" : "No warranty"}
+            </p>
+            <p >Stock: {item.quantityInStock}</p>
             {item.quantityInStock > 0 ? (
               <>
                 {/* Quantity Selector Dropdown */}
@@ -316,6 +326,7 @@ function Items() {
                     <span>Quantity:</span>{" "}
                     <span className="ml-1 font-semibold">{quantity}</span>
                   </button>
+              
                   {dropdownOpen && (
                     <div className="absolute w-full border rounded-md bg-white shadow-lg z-10 mt-1 max-h-40 overflow-y-auto">
                       {[...Array(item.quantityInStock).keys()].map((_, index) => {
@@ -337,13 +348,16 @@ function Items() {
                     </div>
                   )}
                 </div>
-
+                {/* Wishlist Button */}
+                <WishlistItemPage productId={id} />
+                  
                 <button
                   onClick={handleAddToCart}
                   className="w-full bg-primary py-3 rounded-md text-white transition-all hover:bg-white hover:text-primary hover:border-2 hover:border-primary"
                 >
                   Add to Cart
                 </button>
+                
                 {cartMessage && (
                   <p
                     className={`mt-2 text-center ${
