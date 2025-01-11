@@ -18,7 +18,7 @@ const Navbar = () => {
   // Check login status on component mount
   useEffect(() => {
     const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedInStatus);
+    setIsLoggedIn(loggedInStatus || false); // Explicitly set false if not found
   }, []);
 
   const handleSearch = (e) => {
