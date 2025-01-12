@@ -11,15 +11,14 @@ const AddRemoveProducts = () => {
     model: "",
     serialNumber: "",
     description: "",
-    quantityInStock: 0,
-    basePrice: 0,
+    quantityInStock: "",
+    basePrice: "",
     warrantyStatus: true,
     distributorId: "",
     image: [],
   });
   const [loading, setLoading] = useState(false);
 
-  // Fetch search results
   const fetchSearchResults = async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -41,7 +40,6 @@ const AddRemoveProducts = () => {
     }
   };
 
-  // Handle form data change
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -50,7 +48,6 @@ const AddRemoveProducts = () => {
     }));
   };
 
-  // Add product
   const addProduct = async () => {
     if (!formData.title || !formData.categoryId || !formData.basePrice) {
       alert("Please fill in all required fields.");
@@ -76,8 +73,8 @@ const AddRemoveProducts = () => {
           model: "",
           serialNumber: "",
           description: "",
-          quantityInStock: 0,
-          basePrice: 0,
+          quantityInStock: "",
+          basePrice: "",
           warrantyStatus: true,
           distributorId: "",
           image: [],
@@ -92,7 +89,6 @@ const AddRemoveProducts = () => {
     }
   };
 
-  // Remove product
   const removeProduct = async () => {
     if (!selectedProductToRemove) {
       alert("Please select a product to remove.");
@@ -101,7 +97,7 @@ const AddRemoveProducts = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/product/${selectedProductToRemove.id}/delete`,
+        `http://localhost:8080/api/pm/product/${selectedProductToRemove.id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -110,7 +106,8 @@ const AddRemoveProducts = () => {
       if (response.ok) {
         alert("Product removed successfully.");
         setSelectedProductToRemove(null);
-        setSearchQuery(""); // Clear search query to refresh the list
+        setSearchQuery("");
+        setSearchResults([]);
       } else {
         alert("Failed to remove product.");
       }
@@ -129,9 +126,7 @@ const AddRemoveProducts = () => {
       <div className="flex flex-col gap-6">
         {/* Add Product Section */}
         <div>
-          <h3 className="text-lg font-semibold mb-2 text-primary">
-            Add Product
-          </h3>
+          <h3 className="text-lg font-semibold mb-2 text-primary">Add Product</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -183,39 +178,18 @@ const AddRemoveProducts = () => {
             <input
               type="number"
               name="quantityInStock"
-              placeholder="Quantity in Stock"
+              placeholder="Quantity in Stock (e.g., 10)"
               className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              value={formData.quantityInStock}
+              value={formData.quantityInStock || ""}
               onChange={handleFormChange}
             />
             <input
               type="number"
               name="basePrice"
-              placeholder="Base Price"
+              placeholder="Base Price (e.g., 100.50)"
               className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              value={formData.basePrice}
+              value={formData.basePrice || ""}
               onChange={handleFormChange}
-            />
-            <input
-              type="text"
-              name="distributorId"
-              placeholder="Distributor ID"
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              value={formData.distributorId}
-              onChange={handleFormChange}
-            />
-            <input
-              type="text"
-              name="image"
-              placeholder="Image (Base64)"
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              value={formData.image}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  image: [e.target.value],
-                }))
-              }
             />
           </div>
           <button
@@ -249,11 +223,12 @@ const AddRemoveProducts = () => {
                 <div
                   key={product.id}
                   className={`flex items-center p-2 border-b hover:bg-gray-100 ${
-                    selectedProductToRemove?.id === product.id
-                      ? "bg-red-100"
-                      : ""
+                    selectedProductToRemove?.id === product.id ? "bg-red-100" : ""
                   }`}
-                  onClick={() => setSelectedProductToRemove(product)}
+                  onClick={() => {
+                    setSelectedProductToRemove(product);
+                    setSearchResults([]);
+                  }}
                 >
                   <img
                     src={
@@ -278,8 +253,21 @@ const AddRemoveProducts = () => {
               <h4 className="text-red-500 font-semibold">
                 Selected Product to Remove:
               </h4>
-              <p>{selectedProductToRemove.title}</p>
-              <p>${selectedProductToRemove.basePrice.toFixed(2)}</p>
+              <div className="flex items-center">
+                <img
+                  src={
+                    selectedProductToRemove.image
+                      ? `data:image/jpeg;base64,${selectedProductToRemove.image}`
+                      : "https://via.placeholder.com/100"
+                  }
+                  alt={selectedProductToRemove.title}
+                  className="w-16 h-16 object-cover rounded-md mr-4"
+                />
+                <div>
+                  <p>{selectedProductToRemove.title}</p>
+                  <p>${selectedProductToRemove.basePrice.toFixed(2)}</p>
+                </div>
+              </div>
               <button
                 className="mt-2 px-5 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white disabled:opacity-50"
                 onClick={removeProduct}
