@@ -1,31 +1,110 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const DeliveryList = () => {
+  const [deliveries, setDeliveries] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch pending deliveries
+  const fetchDeliveries = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/pm/deliveries/pending', {
+        method: 'GET',
+        credentials: 'include', // Include credentials for authentication
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDeliveries(data);
+      } else {
+        console.error('Failed to fetch deliveries');
+      }
+    } catch (error) {
+      console.error('Error fetching deliveries:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update delivery status
+  const updateDeliveryStatus = async (id, isCompleted) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/pm/deliveries/${id}/status?isCompleted=${isCompleted}`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        alert('Delivery status updated successfully!');
+        fetchDeliveries(); // Refresh the list
+      } else {
+        console.error('Failed to update delivery status');
+      }
+    } catch (error) {
+      console.error('Error updating delivery status:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeliveries();
+  }, []);
+
   return (
     <section className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-4 text-secondary">Delivery List</h2>
-      <table className="w-full table-auto text-left border-collapse">
-        <thead className="bg-gray-200 text-gray-700">
-          <tr>
-            <th className="p-3 border-b">Delivery ID</th>
-            <th className="p-3 border-b">Customer ID</th>
-            <th className="p-3 border-b">Product ID</th>
-            <th className="p-3 border-b">Status</th>
-            <th className="p-3 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="border-b hover:bg-gray-50">
-            <td className="p-3">#001</td>
-            <td className="p-3">123</td>
-            <td className="p-3">P-456</td>
-            <td className="p-3 text-green-500">Delivered</td>
-            <td className="p-3">
-              <button className="text-primary hover:underline">View</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="w-full table-auto text-left border-collapse">
+          <thead className="bg-gray-200 text-gray-700">
+            <tr>
+              <th className="p-3 border-b">Delivery ID</th>
+              <th className="p-3 border-b">Customer ID</th>
+              <th className="p-3 border-b">Product Name</th>
+              <th className="p-3 border-b">Quantity</th>
+              <th className="p-3 border-b">Price</th>
+              <th className="p-3 border-b">Address</th>
+              <th className="p-3 border-b">Status</th>
+              <th className="p-3 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deliveries.map((delivery) => (
+              <tr key={delivery.id} className="border-b hover:bg-gray-50">
+                <td className="p-3">{delivery.id}</td>
+                <td className="p-3">{delivery.customerId}</td>
+                <td className="p-3">{delivery.cartItem?.productName}</td>
+                <td className="p-3">{delivery.cartItem?.quantity}</td>
+                <td className="p-3">${delivery.cartItem?.price}</td>
+                <td className="p-3">
+                  {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city}, {delivery.deliveryAddress?.country}
+                </td>
+                <td className="p-3 text-gray-600">
+                  {delivery.completed ? 'Completed' : 'Pending'}
+                </td>
+                <td className="p-3">
+                  <button
+                    className="px-4 py-2 border border-secondary text-secondary rounded-lg hover:bg-secondary hover:text-white"
+                    onClick={() => updateDeliveryStatus(delivery.id, true)}
+                    disabled={delivery.completed}
+                  >
+                    Complete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   );
 };
