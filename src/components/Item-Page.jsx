@@ -306,6 +306,9 @@ function Items() {
             <p className="text-xl mb-2">${item.basePrice}</p>
             <p className="text-lg mb-4">{item.description}</p>
             <p className="text-lg mb-2">
+              <span className="font-bold">Product ID:</span> {item.id}
+            </p>
+            <p className="text-lg mb-2">
               <span className="font-bold">Model:</span> {item.model}
             </p>
             <p className="text-lg mb-2">
