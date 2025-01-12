@@ -97,6 +97,14 @@ function Profile() {
     );
   }
 
+  const showSalesButton =
+  (user.name && user.name.toLowerCase().includes('sales')) ||
+  (user.surname && user.surname.toLowerCase().includes('sales'));
+  const showProductButton =
+  (user.name && user.name.toLowerCase().includes('product')) ||
+  (user.surname && user.surname.toLowerCase().includes('product'));
+
+
   return (
     <>
       <Navbar />
@@ -128,6 +136,32 @@ function Profile() {
           <p className="text-lg text-gray-700">
             <strong>Registered Date:</strong> {new Date(user.registerDate).toLocaleDateString()}
           </p>
+
+          {/* Dashboard Buttons */}
+          <div className="mt-6 flex gap-4">
+            {showSalesButton && (
+              <button
+                onClick={() => navigate('/sales-manager')}
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition"
+              >
+                Go to Sales Manager Dashboard
+              </button>
+            )}
+            {showProductButton && (
+              <button
+                onClick={() => navigate('/product-manager')}
+                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition"
+              >
+                Go to Product Manager Dashboard
+              </button>
+            )}
+          </div>
+
+          {!showSalesButton && !showProductButton && (
+            <p className="text-gray-600 mt-4">
+              No dashboard links available for your profile.
+            </p>
+          )}
         </div>
 
         {/* Orders Section */}
@@ -136,9 +170,7 @@ function Profile() {
           {ordersError ? (
             <p className="text-gray-500">{ordersError}</p>
           ) : orders.length > 0 ? (
-            orders.map((order, index) => (
-              <OrderSummary key={index} order={order} />
-            ))
+            orders.map((order, index) => <OrderSummary key={index} order={order} />)
           ) : (
             <p className="text-gray-600">You have no orders yet.</p>
           )}
@@ -161,7 +193,7 @@ function Profile() {
 
 function OrderSummary({ order }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [comments, setComments] = useState({}); // To store comments for each item
+  const [comments, setComments] = useState({});
   const contentRef = useRef(null);
 
   const statusStages = ['PROCESSING', 'IN_TRANSIT', 'DELIVERED'];
