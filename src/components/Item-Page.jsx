@@ -86,7 +86,7 @@ function Items() {
     const fetchAverageRating = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/comments/${id}/get-avg-rating`,
+          `http://localhost:8080/api/ratings/${id}/average`,
           {
             method: "GET",
             headers: {
