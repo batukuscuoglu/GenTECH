@@ -142,7 +142,7 @@ function Profile() {
             {showSalesButton && (
               <button
                 onClick={() => navigate('/sales-manager')}
-                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition"
+                className="bg-secondary text-white py-2 px-4 rounded-md hover:bg-primary transition"
               >
                 Go to Sales Manager Dashboard
               </button>
@@ -150,7 +150,7 @@ function Profile() {
             {showProductButton && (
               <button
                 onClick={() => navigate('/product-manager')}
-                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition"
+                className="bg-secondary text-white py-2 px-4 rounded-md hover:bg-primary transition"
               >
                 Go to Product Manager Dashboard
               </button>
