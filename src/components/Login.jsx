@@ -35,7 +35,7 @@ function Login() {
         alert(data.message || 'Login successful!');
         localStorage.setItem('isLoggedIn', 'true'); // Update localStorage to reflect logged-in state
         await mergeOfflineCart(); // Merge offline cart with backend cart
-        navigate('/profile'); // Redirect to the profile page
+        navigate('/'); // Redirect to the profile page
       } else {
         alert(data.message || 'Login failed.');
       }

@@ -159,7 +159,6 @@ function Profile() {
 
           {!showSalesButton && !showProductButton && (
             <p className="text-gray-600 mt-4">
-              No dashboard links available for your profile.
             </p>
           )}
         </div>
