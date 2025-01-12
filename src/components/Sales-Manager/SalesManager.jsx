@@ -3,7 +3,6 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import Navbar from '../Navbar/Navbar.jsx';
 import Footer from '../Footer.jsx';
 import SetProductPricing from './SalesManagerSection/SetProductPricing';
-import NotifyUsers from './SalesManagerSection/NotifyUsers';
 import ManageInvoices from './SalesManagerSection/ManageInvoices';
 import RevenueAnalysis from './SalesManagerSection/RevenueAnalysis';
 import RefundRequests from './SalesManagerSection/RefundRequests';
@@ -12,10 +11,6 @@ const sections = [
   {
     title: 'Set Product Pricing & Discounts',
     component: <SetProductPricing />,
-  },
-  {
-    title: 'Notify Users About Discounts',
-    component: <NotifyUsers />,
   },
   {
     title: 'View and Manage Invoices',
