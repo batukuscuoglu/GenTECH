@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const AddRemoveProducts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedProductToRemove, setSelectedProductToRemove] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -19,6 +20,28 @@ const AddRemoveProducts = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  // Fetch categories for dropdown
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/product/get-categories", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data || []);
+      } else {
+        console.error("Failed to fetch categories.");
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  // Fetch search results for products
   const fetchSearchResults = async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -40,6 +63,7 @@ const AddRemoveProducts = () => {
     }
   };
 
+  // Handle form data change
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -48,6 +72,7 @@ const AddRemoveProducts = () => {
     }));
   };
 
+  // Add product
   const addProduct = async () => {
     if (!formData.title || !formData.categoryId || !formData.basePrice) {
       alert("Please fill in all required fields.");
@@ -89,6 +114,7 @@ const AddRemoveProducts = () => {
     }
   };
 
+  // Remove product
   const removeProduct = async () => {
     if (!selectedProductToRemove) {
       alert("Please select a product to remove.");
@@ -118,6 +144,11 @@ const AddRemoveProducts = () => {
     }
   };
 
+  // Load categories on component mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   return (
     <section className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-4 text-secondary">
@@ -136,14 +167,19 @@ const AddRemoveProducts = () => {
               value={formData.title}
               onChange={handleFormChange}
             />
-            <input
-              type="text"
+            <select
               name="categoryId"
-              placeholder="Category ID"
               className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               value={formData.categoryId}
               onChange={handleFormChange}
-            />
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name} (ID: {category.id})
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               name="brand"
