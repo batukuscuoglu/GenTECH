@@ -49,6 +49,19 @@ function Profile() {
     }
   };
 
+  const getTaxID = () => {
+    if (user) {
+      if (user.name?.toLowerCase().includes('sales') || user.surname?.toLowerCase().includes('sales')) {
+        return 'TAX1234-SALES';
+      } else if (user.name?.toLowerCase().includes('product') || user.surname?.toLowerCase().includes('product')) {
+        return 'TAX5678-PRODUCT';
+      } else {
+        return 'TAX9999-OTHERS';
+      }
+    }
+    return 'N/A';
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -126,6 +139,9 @@ function Profile() {
               </p>
               <p className="text-lg text-gray-700">
                 <strong>Phone:</strong> {user.phone}
+              </p>
+              <p className="text-lg text-gray-700">
+                <strong>Tax ID:</strong> {getTaxID()}
               </p>
             </div>
           </div>
