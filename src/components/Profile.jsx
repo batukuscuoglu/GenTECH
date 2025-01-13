@@ -168,7 +168,13 @@ function Profile() {
           {ordersError ? (
             <p className="text-gray-500">{ordersError}</p>
           ) : orders.length > 0 ? (
-            orders.map((order, index) => <OrderSummary key={index} order={order} />)
+            orders.map((order, index) => (
+              <OrderSummary
+                key={index}
+                order={order}
+                refreshOrders={fetchData} // Pass fetchData to refresh orders
+              />
+            ))
           ) : (
             <p className="text-gray-600">You have no orders yet.</p>
           )}
@@ -189,13 +195,38 @@ function Profile() {
   );
 }
 
-function OrderSummary({ order }) {
+function OrderSummary({ order, refreshOrders }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState({});
   const contentRef = useRef(null);
 
   const statusStages = ['PROCESSING', 'IN_TRANSIT', 'DELIVERED'];
   const currentStageIndex = statusStages.indexOf(order.orderStatus);
+
+  const handleRefundRequest = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/orders/${order.id}/request-refund`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        alert('Refund request submitted successfully!');
+        refreshOrders(); // Refresh orders to update UI
+      } else {
+        alert('Failed to submit refund request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting refund request:', error);
+      alert('An error occurred while submitting the refund request.');
+    }
+  };
 
   const handleCommentSubmit = async (productId, commentContent) => {
     try {
@@ -273,6 +304,18 @@ function OrderSummary({ order }) {
         </div>
         <span className="text-secondary text-lg">{isExpanded ? '▲' : '▼'}</span>
       </div>
+
+      {/* Refund Button */}
+      {order.orderStatus !== 'REFUNDED' && order.orderStatus !== 'PENDING_REFUND' && (
+        <div className="mt-4">
+          <button
+            onClick={handleRefundRequest}
+            className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition"
+          >
+            Request Refund
+          </button>
+        </div>
+      )}
 
       {/* Status Tracker */}
       <div className="flex items-center justify-between mt-4 mb-6">
