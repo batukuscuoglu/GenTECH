@@ -8,6 +8,7 @@ import AdjustStockLevels from './ProductManagerSection/AdjustStockLevels';
 import ViewInvoices from './ProductManagerSection/ViewInvoices';
 import ApproveComments from './ProductManagerSection/ApproveComments';
 import DeliveryList from './ProductManagerSection/DeliveryList';
+import StatusTracking from './ProductManagerSection/StatusTracking';
 
 const sections = [
    {
@@ -34,6 +35,10 @@ const sections = [
        title: 'Delivery List',
        component: <DeliveryList />,
    },
+   {
+    title: 'Status Tracking',
+    component: <StatusTracking />,
+  },  
 ];
 
 const ProductManager = () => {
