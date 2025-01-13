@@ -98,12 +98,11 @@ function Profile() {
   }
 
   const showSalesButton =
-  (user.name && user.name.toLowerCase().includes('sales')) ||
-  (user.surname && user.surname.toLowerCase().includes('sales'));
+    (user.name && user.name.toLowerCase().includes('sales')) ||
+    (user.surname && user.surname.toLowerCase().includes('sales'));
   const showProductButton =
-  (user.name && user.name.toLowerCase().includes('product')) ||
-  (user.surname && user.surname.toLowerCase().includes('product'));
-
+    (user.name && user.name.toLowerCase().includes('product')) ||
+    (user.surname && user.surname.toLowerCase().includes('product'));
 
   return (
     <>
@@ -198,44 +197,58 @@ function OrderSummary({ order }) {
   const statusStages = ['PROCESSING', 'IN_TRANSIT', 'DELIVERED'];
   const currentStageIndex = statusStages.indexOf(order.orderStatus);
 
-  const handleCommentSubmit = async (productId, commentContent, rating) => {
-    const commentPayload = {
-      productId,
-      content: commentContent,
-      rating,
-    };
-
+  const handleCommentSubmit = async (productId, commentContent) => {
     try {
-      const response = await fetch('http://localhost:8080/api/comments/add-comment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer <your-token>',
-        },
-        credentials: 'include',
-        body: JSON.stringify(commentPayload),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/comments?productId=${productId}&content=${encodeURIComponent(
+          commentContent
+        )}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
 
       if (response.ok) {
-        alert('Comment added successfully!');
-        setComments((prevComments) => ({
-          ...prevComments,
-          [productId]: { content: commentContent, rating },
-        }));
+        alert('Comment and rating added successfully!');
+        setComments((prev) => ({ ...prev, [productId]: { content: commentContent } }));
       } else {
-        alert('Failed to add comment. Please try again.');
+        alert('Failed to add comment.');
       }
     } catch (error) {
-      console.error('Error submitting comment:', error);
-      alert('An error occurred while submitting the comment.');
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  const handleRatingSubmit = async (productId, ratingValue) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/ratings?productId=${productId}&ratingValue=${ratingValue}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        
+      } else {
+        
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
     }
   };
 
   const handleRatingChange = (productId, rating) => {
-    setComments((prev) => ({
-      ...prev,
-      [productId]: { ...prev[productId], rating },
-    }));
+    setComments((prev) => ({ ...prev, [productId]: { ...prev[productId], rating } }));
+    handleRatingSubmit(productId, rating);
   };
 
   return (
@@ -319,10 +332,14 @@ function OrderSummary({ order }) {
                   <textarea
                     placeholder="Write your comment here..."
                     className="w-full border rounded-md p-2 mt-2 mb-2"
+                    value={comments[item.product.id]?.content || ''}
                     onChange={(e) =>
                       setComments((prev) => ({
                         ...prev,
-                        [item.product.id]: { ...prev[item.product.id], content: e.target.value },
+                        [item.product.id]: {
+                          ...prev[item.product.id],
+                          content: e.target.value,
+                        },
                       }))
                     }
                   ></textarea>
@@ -334,7 +351,10 @@ function OrderSummary({ order }) {
                         key={star}
                         className="cursor-pointer"
                         style={{
-                          color: star <= (comments[item.product.id]?.rating || 0) ? '#96EFFF' : '#D1D5DB',
+                          color:
+                            star <= (comments[item.product.id]?.rating || 0)
+                              ? '#96EFFF'
+                              : '#D1D5DB',
                         }}
                         onClick={() => handleRatingChange(item.product.id, star)}
                       />
@@ -343,11 +363,12 @@ function OrderSummary({ order }) {
 
                   <button
                     onClick={() =>
-                      handleCommentSubmit(
-                        item.product.id,
-                        comments[item.product.id]?.content || '',
-                        comments[item.product.id]?.rating || 0
-                      )
+                      comments[item.product.id]?.content
+                        ? handleCommentSubmit(
+                            item.product.id,
+                            comments[item.product.id].content
+                          )
+                        : alert('Star rating is given!')
                     }
                     className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition mt-4"
                   >

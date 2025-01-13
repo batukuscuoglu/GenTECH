@@ -12,27 +12,46 @@ const ViewInvoices = () => {
         const response = await fetch("http://localhost:8080/invoices", {
           credentials: "include", // Include credentials
         });
+
         if (response.ok) {
           const data = await response.json();
+
+          // Retrieve order status for each invoice
           const detailedInvoices = await Promise.all(
             data.map(async (invoice) => {
-              const orderResponse = await fetch(
-                `http://localhost:8080/api/orders/${invoice.orderId}`,
-                { credentials: "include" }
-              );
-              if (orderResponse.ok) {
-                const orderData = await orderResponse.json();
+              try {
+                const orderResponse = await fetch(
+                  `http://localhost:8080/api/orders/${invoice.orderId}`,
+                  { credentials: "include" }
+                );
+
+                if (orderResponse.ok) {
+                  const orderData = await orderResponse.json();
+                  return {
+                    ...invoice,
+                    deliveryStatus:
+                      orderData.orderStatus === "PROCESSING"
+                        ? "Processing"
+                        : orderData.orderStatus === "DELIVERED"
+                        ? "Delivered"
+                        : "Pending",
+                  };
+                } else {
+                  return {
+                    ...invoice,
+                    deliveryStatus: "Unknown",
+                  };
+                }
+              } catch (error) {
+                console.error(`Error fetching order data for ${invoice.orderId}:`, error);
                 return {
                   ...invoice,
-                  deliveryStatus: orderData.completed
-                    ? "Delivered"
-                    : "Pending",
+                  deliveryStatus: "Unknown",
                 };
-              } else {
-                return { ...invoice, deliveryStatus: "Unknown" };
               }
             })
           );
+
           setInvoices(detailedInvoices);
         } else {
           throw new Error("Failed to fetch invoices.");
@@ -57,6 +76,7 @@ const ViewInvoices = () => {
           <thead className="bg-gray-200 text-gray-700">
             <tr>
               <th className="p-3 border-b">Invoice ID</th>
+              <th className="p-3 border-b">Order ID</th>
               <th className="p-3 border-b">Customer Email</th>
               <th className="p-3 border-b">Amount</th>
               <th className="p-3 border-b">Delivery Status</th>
@@ -66,12 +86,15 @@ const ViewInvoices = () => {
             {invoices.map((invoice) => (
               <tr key={invoice.id} className="border-b hover:bg-gray-50">
                 <td className="p-3">{invoice.id}</td>
+                <td className="p-3">{invoice.orderId}</td>
                 <td className="p-3">{invoice.email}</td>
                 <td className="p-3">${invoice.totalAmount.toFixed(2)}</td>
                 <td
                   className={`p-3 ${
                     invoice.deliveryStatus === "Delivered"
                       ? "text-green-500"
+                      : invoice.deliveryStatus === "Processing"
+                      ? "text-yellow-500"
                       : "text-red-500"
                   }`}
                 >
