@@ -12,10 +12,16 @@ const ViewInvoices = () => {
       alert("Please provide both start and end dates.");
       return;
     }
+
+    // Adjust endDate to include the last day
+    const adjustedEndDate = new Date(endDate);
+    adjustedEndDate.setDate(adjustedEndDate.getDate() + 1); // Add 1 day to make endDate inclusive
+    const formattedEndDate = adjustedEndDate.toISOString().split("T")[0];
+
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/sm/invoices?startDate=${startDate}&endDate=${endDate}`,
+        `http://localhost:8080/api/sm/invoices?startDate=${startDate}&endDate=${formattedEndDate}`,
         {
           method: "GET",
           headers: {
