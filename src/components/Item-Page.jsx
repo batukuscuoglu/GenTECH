@@ -406,11 +406,11 @@ function Items() {
                   {/* Display userId or username */}
                   <p className="font-semibold mb-1">User ID: {comment.userId}</p>
                   <div className="flex items-center mb-2">
-                    {/* Render stars based on rating */}
+                    {/* Render stars based on rating !5 here!*/}
                     {Array(5)
                       .fill(0)
                       .map((_, index) =>
-                        index < comment.rating ? (
+                        index < 5 ? ( 
                           <FaStar key={index} className="text-primary mr-1" />
                         ) : (
                           <FaRegStar key={index} className="text-gray-400 mr-1" />
