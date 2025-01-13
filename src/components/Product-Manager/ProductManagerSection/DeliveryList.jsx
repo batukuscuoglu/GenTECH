@@ -75,7 +75,7 @@ const DeliveryList = () => {
               <th className="p-3 border-b">Customer ID</th>
               <th className="p-3 border-b">Product Name</th>
               <th className="p-3 border-b">Quantity</th>
-              <th className="p-3 border-b">Price</th>
+              <th className="p-3 border-b">Total Price</th>
               <th className="p-3 border-b">Address</th>
               <th className="p-3 border-b">Status</th>
               <th className="p-3 border-b">Actions</th>
@@ -92,7 +92,8 @@ const DeliveryList = () => {
                   ${delivery.cartItem2?.price ? delivery.cartItem2.price.toFixed(2) : "N/A"}
                 </td>
                 <td className="p-3">
-                  {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city},{" "}
+                  {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city},
+                  {" "}
                   {delivery.deliveryAddress?.country}
                 </td>
                 <td className="p-3 text-gray-600">

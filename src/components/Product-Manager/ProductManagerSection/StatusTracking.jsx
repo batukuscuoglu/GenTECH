@@ -84,6 +84,7 @@ const StatusTracking = () => {
                   <th className="p-3 border">Customer</th>
                   <th className="p-3 border">Total Price</th>
                   <th className="p-3 border">Order Date</th>
+                  <th className="p-3 border">Delivery Address</th>
                   <th className="p-3 border">Actions</th>
                 </tr>
               </thead>
@@ -98,6 +99,11 @@ const StatusTracking = () => {
                     <td className="p-3">
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleString()
+                        : 'N/A'}
+                    </td>
+                    <td className="p-3">
+                      {order.address
+                        ? `${order.address.street}, ${order.address.city}, ${order.address.country}`
                         : 'N/A'}
                     </td>
                     <td className="p-3">
