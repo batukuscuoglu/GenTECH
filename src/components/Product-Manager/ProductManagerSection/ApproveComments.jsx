@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const ApproveComments = () => {
   const [unapprovedComments, setUnapprovedComments] = useState([]);
@@ -10,49 +10,60 @@ const ApproveComments = () => {
     const fetchUnapprovedComments = async () => {
       setLoading(true);
       try {
-        const response = await fetch('http://localhost:8080/api/pm/comments/unapproved', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include', // Include credentials for authentication
-        });
+        const response = await fetch(
+          "http://localhost:8080/api/pm/comments/unapproved",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // Include credentials for authentication
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
           setUnapprovedComments(data || []);
           await fetchProductDetails(data);
         } else {
-          console.error('Failed to fetch unapproved comments.');
+          console.error("Failed to fetch unapproved comments.");
         }
       } catch (error) {
-        console.error('Error fetching unapproved comments:', error);
+        console.error("Error fetching unapproved comments:", error);
       } finally {
         setLoading(false);
       }
     };
 
     const fetchProductDetails = async (comments) => {
-      const productIds = [...new Set(comments.map((comment) => comment.productId))];
+      const productIds = [
+        ...new Set(comments.map((comment) => comment.productId)),
+      ];
       const details = {};
 
       await Promise.all(
         productIds.map(async (productId) => {
           try {
-            const response = await fetch(`http://localhost:8080/api/product/${productId}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-            });
+            const response = await fetch(
+              `http://localhost:8080/api/product/${productId}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+              }
+            );
 
             if (response.ok) {
               const product = await response.json();
               details[productId] = product.title;
             }
           } catch (error) {
-            console.error(`Error fetching product details for ID ${productId}:`, error);
+            console.error(
+              `Error fetching product details for ID ${productId}:`,
+              error
+            );
           }
         })
       );
@@ -67,18 +78,18 @@ const ApproveComments = () => {
   const approveComment = async (commentId) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/comments/${commentId}/approve`,
+        `http://localhost:8080/api/pm/comments/${commentId}/approve`,
         {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include', // Include credentials for authentication
+          credentials: "include", // Include credentials for authentication
         }
       );
 
       if (response.ok) {
-        alert('Comment approved successfully.');
+        alert("Comment approved successfully.");
         setUnapprovedComments((prev) =>
           prev.filter((comment) => comment.id !== commentId)
         );
@@ -87,8 +98,8 @@ const ApproveComments = () => {
         alert(`Failed to approve comment: ${errorData}`);
       }
     } catch (error) {
-      console.error('Error approving comment:', error);
-      alert('Error approving comment.');
+      console.error("Error approving comment:", error);
+      alert("Error approving comment.");
     }
   };
 
@@ -102,7 +113,9 @@ const ApproveComments = () => {
 
   return (
     <section className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4 text-secondary">Approve/Disapprove Comments</h2>
+      <h2 className="text-xl font-semibold mb-4 text-secondary">
+        Approve/Disapprove Comments
+      </h2>
       {loading ? (
         <p>Loading unapproved comments...</p>
       ) : unapprovedComments.length === 0 ? (
@@ -124,7 +137,10 @@ const ApproveComments = () => {
                 <td className="p-3">{comment.id}</td>
                 <td className="p-3">{comment.userId}</td>
                 <td className="p-3">
-                  <strong>{productDetails[comment.productId] || 'Loading...'}</strong> (ID: {comment.productId})
+                  <strong>
+                    {productDetails[comment.productId] || "Loading..."}
+                  </strong>{" "}
+                  (ID: {comment.productId})
                 </td>
                 <td className="p-3">{comment.content}</td>
                 <td className="p-3 flex gap-4">
