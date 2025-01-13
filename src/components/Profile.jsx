@@ -260,7 +260,11 @@ function OrderSummary({ order }) {
       >
         <div>
           <h3 className="text-lg font-semibold text-gray-800">Order #{order.id}</h3>
-          <p className="text-sm text-gray-600">
+          <p
+            className={`text-sm ${
+              order.orderStatus === 'REFUNDED' ? 'text-red-500 font-bold' : 'text-gray-600'
+            }`}
+          >
             <strong>Status:</strong> {order.orderStatus || 'Unknown'}
           </p>
           <p className="text-sm text-gray-600">
