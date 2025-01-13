@@ -32,9 +32,13 @@ const ViewInvoices = () => {
                     deliveryStatus:
                       orderData.orderStatus === "PROCESSING"
                         ? "Processing"
+                        : orderData.orderStatus === "IN_TRANSIT"
+                        ? "In Transit"
                         : orderData.orderStatus === "DELIVERED"
                         ? "Delivered"
-                        : "Pending",
+                        : orderData.orderStatus === "REFUNDED"
+                        ? "Refunded"
+                        : "Unknown",
                   };
                 } else {
                   return {
@@ -95,7 +99,11 @@ const ViewInvoices = () => {
                       ? "text-green-500"
                       : invoice.deliveryStatus === "Processing"
                       ? "text-yellow-500"
-                      : "text-red-500"
+                      : invoice.deliveryStatus === "In Transit"
+                      ? "text-blue-500"
+                      : invoice.deliveryStatus === "Refunded"
+                      ? "text-red-500"
+                      : "text-purple-500"
                   }`}
                 >
                   {invoice.deliveryStatus}
