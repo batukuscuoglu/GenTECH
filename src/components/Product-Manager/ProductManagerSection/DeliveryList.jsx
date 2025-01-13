@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const DeliveryList = () => {
   const [deliveries, setDeliveries] = useState([]);
@@ -8,22 +8,26 @@ const DeliveryList = () => {
   const fetchDeliveries = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/pm/deliveries/pending', {
-        method: 'GET',
-        credentials: 'include', // Include credentials for authentication
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/pm/deliveries/pending",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Deliveries Data:", data); // Debugging purposes
         setDeliveries(data);
       } else {
-        console.error('Failed to fetch deliveries');
+        console.error("Failed to fetch deliveries");
       }
     } catch (error) {
-      console.error('Error fetching deliveries:', error);
+      console.error("Error fetching deliveries:", error);
     } finally {
       setLoading(false);
     }
@@ -35,22 +39,22 @@ const DeliveryList = () => {
       const response = await fetch(
         `http://localhost:8080/api/pm/deliveries/${id}/status?isCompleted=${isCompleted}`,
         {
-          method: 'PATCH',
-          credentials: 'include',
+          method: "PATCH",
+          credentials: "include",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (response.ok) {
-        alert('Delivery status updated successfully!');
+        alert("Delivery status updated successfully!");
         fetchDeliveries(); // Refresh the list
       } else {
-        console.error('Failed to update delivery status');
+        console.error("Failed to update delivery status");
       }
     } catch (error) {
-      console.error('Error updating delivery status:', error);
+      console.error("Error updating delivery status:", error);
     }
   };
 
@@ -82,14 +86,17 @@ const DeliveryList = () => {
               <tr key={delivery.id} className="border-b hover:bg-gray-50">
                 <td className="p-3">{delivery.id}</td>
                 <td className="p-3">{delivery.customerId}</td>
-                <td className="p-3">{delivery.cartItem?.productName}</td>
-                <td className="p-3">{delivery.cartItem?.quantity}</td>
-                <td className="p-3">${delivery.cartItem?.price}</td>
+                <td className="p-3">{delivery.cartItem2?.productName || "N/A"}</td>
+                <td className="p-3">{delivery.cartItem2?.quantity || "N/A"}</td>
                 <td className="p-3">
-                  {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city}, {delivery.deliveryAddress?.country}
+                  ${delivery.cartItem2?.price ? delivery.cartItem2.price.toFixed(2) : "N/A"}
+                </td>
+                <td className="p-3">
+                  {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city},{" "}
+                  {delivery.deliveryAddress?.country}
                 </td>
                 <td className="p-3 text-gray-600">
-                  {delivery.completed ? 'Completed' : 'Pending'}
+                  {delivery.completed ? "Completed" : "Pending"}
                 </td>
                 <td className="p-3">
                   <button
